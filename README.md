@@ -33,3 +33,13 @@ cmake -G Ninja -S . -B build
 cmake --build build
 
 ```
+
+## Building on Windows
+
+1. Qt5 for MSVC and Visual Studio 2019 needs to be installed
+
+2. Configure and compile
+
+```
+cmake -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019\lib\cmake\Qt5 -A Win32 -S . -B build
+```
