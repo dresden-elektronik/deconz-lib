@@ -66,7 +66,7 @@ public:
 #if QT_VERSION < QT_VERSION_CHECK(5,14,0)
     ApsTxOptions txOptions = nullptr;
 #else
-    ApsTxOptions txOptions;
+    ApsTxOptions txOptions = {};
 #endif
     int sendDelay = 0;
     uint16_t profileId = 0xFFFF;
@@ -376,7 +376,7 @@ int ApsDataRequest::writeToStream(QDataStream &stream) const
     {
         stream << (uint8_t)asdu()[i];
     }
-    stream << (uint8_t)txOptions();
+    stream << (uint8_t)static_cast<int>(txOptions());
     stream << radius();
 
     if (flags & 0x02)
@@ -428,7 +428,6 @@ void ApsDataRequest::readFromStream(QDataStream &stream)
         break;
 
     default:
-        qDebug() << Q_FUNC_INFO << "invalid address mode";
         return;
     }
 
@@ -449,8 +448,17 @@ void ApsDataRequest::readFromStream(QDataStream &stream)
 
     setAsdu(asdu);
     stream >> u8;
-    ApsTxOptions txOptions(ApsTxAcknowledgedTransmission | ApsTxFragmentationPermitted | ApsTxSecurityEnabledTransmission | ApsTxUseNwk);
-    setTxOptions(txOptions & u8);
+    //ApsTxOptions txOptions(ApsTxAcknowledgedTransmission | ApsTxFragmentationPermitted | ApsTxSecurityEnabledTransmission | ApsTxUseNwk);
+    u8 &= 0x0F;
+
+    // fugly but can't cast to QFlags
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        ApsTxOption opt = (ApsTxOption)(1 << i);
+        bool set = (u8 & (1 << i)) != 0;
+        d_ptr->txOptions.setFlag(opt, set);
+    }
+
     stream >> u8;
     setRadius(u8);
 }
