@@ -83,7 +83,7 @@ Http::HttpStatus UrlDescriptor::parseUrl(const char *buf, size_t length)
         return Http::HttpStatusUriTooLong;
 
     m_buf = buf;
-    m_length = length;
+    m_length = (uint8_t)length;
 
     size_t compPos = 0;
     for (size_t i = 0; i < length; i++)
@@ -104,18 +104,18 @@ Http::HttpStatus UrlDescriptor::parseUrl(const char *buf, size_t length)
                     return Http::HttpStatusRequestHeaderFieldsTooLarge; // not at the end, next component wouldn't fit
                 }
 
-                m_comp[compPos].offset = i + 1;
+                m_comp[compPos].offset = (uint8_t)i + 1;
                 m_comp[compPos].length = 0;
             }
             else
             {
-                comp.offset = i + 1;
+                comp.offset = (uint8_t)i + 1;
             }
         }
         else if (m_buf[i] == '?') // start of query string
         {
 //            m_buf[i] = '\0';
-            m_query = i;
+            m_query = (uint8_t)i;
             break;
         }
         else
@@ -453,18 +453,19 @@ void QHttpRequestHeaderPrivate::init(const char *buf, size_t size)
         return;
     }
 
-    if (size >= raw.size())
+    if (size >= raw.size() || size > UINT16_MAX)
     {
         parseStatus = Http::HttpStatusRequestHeaderFieldsTooLarge;
         return;
     }
 
-    rawSize = size;
+    rawSize = (uint16_t)size;
 
     memcpy(raw.data(), buf, size);
     raw[size] = '\0';
 
     char *pos = raw.data();
+    char *end = raw.data() + raw.size();
 
     cMethod = findNextToken(pos, MaxMethodLength);
     if (cMethod.size() == 0)
@@ -496,7 +497,7 @@ void QHttpRequestHeaderPrivate::init(const char *buf, size_t size)
 
     if (cUrl.size() == 0)
     {
-        if ((raw.end() - pos) > MaxUrlLength)
+        if ((end - pos) > MaxUrlLength)
         {
             parseStatus = Http::HttpStatusUriTooLong;
         }
@@ -522,7 +523,7 @@ void QHttpRequestHeaderPrivate::init(const char *buf, size_t size)
     pos += version2.size() + 1;
 
 
-    while (isspace(*pos) && pos < raw.end())
+    while (isspace(*pos) && pos < end)
     {
         pos++;
     }
