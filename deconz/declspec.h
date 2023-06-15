@@ -21,7 +21,7 @@
       #define DECONZ_DECL_EXPORT     __attribute__((visibility("default")))
     #endif
 
-    #ifdef __WIN32__
+    #ifdef _WIN32
       #ifndef DECONZ_VISIBILITY_AVAILABLE
         #define DECONZ_DECL_IMPORT     __declspec(dllimport)
         #define DECONZ_DECL_EXPORT     __declspec(dllexport)
