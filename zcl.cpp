@@ -1539,16 +1539,22 @@ void ZclAttribute::setEnumerator(uint value)
 void ZclAttribute::setBit(uint bit, bool one)
 {
     Q_D(ZclAttribute);
-    if (one) d->m_valueState.bitmap |=  (quint64)(1 << bit);
-    else     d->m_valueState.bitmap &= (quint64)~(1 << bit);
 
-    d->m_value = quint64(d->m_valueState.bitmap);
+    if (bit < 64)
+    {
+        if (one) d->m_valueState.bitmap |= (1ULL << (uint64_t)bit);
+        else     d->m_valueState.bitmap &= ~(1ULL << (uint64_t)bit);
+
+        d->m_value = quint64(d->m_valueState.bitmap);
+    }
 }
 
 bool ZclAttribute::bit(int bit) const
 {
     Q_D(const ZclAttribute);
-    return d->m_valueState.bitmap & (quint64)(1 << bit);
+    if (bit >= 0 && bit < 64)
+        return d->m_valueState.bitmap & (1ULL << (uint64_t)bit);
+    return false;
 }
 
 int ZclAttribute::bitCount() const
