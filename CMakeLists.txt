@@ -80,7 +80,6 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
     VERSION ${PROJECT_VERSION}
-    PUBLIC_HEADER "${PUB_INCLUDE_FILES}"
 )
 
 target_include_directories(${PROJECT_NAME}
