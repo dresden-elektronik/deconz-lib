@@ -34,12 +34,10 @@
 #include <deconz/timeref.h>
 #include <deconz/util.h>
 #include <deconz/u_rand32.h>
+#include <deconz/u_library.h>
 #include <deconz/zcl.h>
 #include <deconz/zdp_profile.h>
 #include <deconz/zdp_descriptors.h>
-
-#if QT_VERSION >= 0x050000
-  #include <deconz/qhttprequest_compat.h>
-#endif
+#include <deconz/qhttprequest_compat.h>
 
 #endif // DECONZ_H
