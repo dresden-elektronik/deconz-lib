@@ -24,6 +24,7 @@ set(PUB_INCLUDE_FILES
     deconz/types.h
     deconz/util.h
     deconz/u_rand32.h
+    deconz/u_library.h
     deconz/zcl.h
     deconz/zdp_descriptors.h
     deconz/zdp_profile.h
@@ -58,6 +59,12 @@ add_library(${PROJECT_NAME} SHARED
     touchlink_controller.cpp
 )
 
+if (WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
+else()
+    target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
+endif()
+
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_NAME deCONZ)
 
 #add_library(deCONZ::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -67,6 +74,7 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
     DECONZ_DLLSPEC=DECONZ_DECL_EXPORT
+    U_SHARED_LIB
     USE_QEXT_SERIAL
 )
 
@@ -84,7 +92,7 @@ set_target_properties(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/deconz>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
