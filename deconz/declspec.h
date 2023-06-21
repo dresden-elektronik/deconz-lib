@@ -11,22 +11,22 @@
  *
  */
 
-#ifdef __GNUC__
-  #define DECONZ_VISIBILITY_AVAILABLE
+#undef DECONZ_DLLSPEC
+
+#ifdef _WIN32
+
+#ifdef U_SHARED_LIB
+    #define DECONZ_DLLSPEC     __declspec(dllexport)
+#else
+   #define DECONZ_DLLSPEC __declspec(dllimport)
 #endif
 
-#ifndef DECONZ_DECL_IMPORT
-    #ifdef DECONZ_VISIBILITY_AVAILABLE
-      #define DECONZ_DECL_IMPORT     __attribute__((visibility("default")))
-      #define DECONZ_DECL_EXPORT     __attribute__((visibility("default")))
-    #endif
+#else // Unix
 
-    #ifdef _WIN32
-      #ifndef DECONZ_VISIBILITY_AVAILABLE
-        #define DECONZ_DECL_IMPORT     __declspec(dllimport)
-        #define DECONZ_DECL_EXPORT     __declspec(dllexport)
-      #endif
-    #endif
-#endif /* DECONZ_DECL_IMPORT */
+  #define DECONZ_DLLSPEC
+
+#endif
+
+
 
 #endif // DECONZ_DECLSPEC_H

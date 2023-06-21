@@ -8,13 +8,13 @@
  *
  */
 
-#include <libloaderapi.h>
+#include <Windows.h>
 #include "u_library.h"
 
 void *U_library_open(const char *filename)
 {
     HMODULE h;
-    h = LoadLibrary(filename);
+    h = LoadLibraryA(filename);
     return (void*)h;
 }
 
