@@ -3993,19 +3993,19 @@ void ZclDataBase::initDbFile(const QString &zclFile)
                 stream << "\n";
             }
 #endif // OSX
-#ifdef Q_OS_OSX
+#ifdef __APPLE__
             QDir dir(qApp->applicationDirPath());
             dir.cdUp();
-            dir.cd("Resources");
+            dir.cd("Resources/zcl");
 
-            QString gen = QString("%1/general.xml").arg(dir.path());
+            QString gen = dir.absoluteFilePath("general.xml");
             if (QFile::exists(gen))
             {
                 DBG_Printf(DBG_INFO, "ZCLDB add file %s \n", qPrintable(gen));
                 stream << gen;
                 stream << "\n";
             }
-#endif // OSX
+#endif // __APPLE__
         }
         else
         {
