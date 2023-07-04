@@ -366,6 +366,9 @@ QString getStorageLocation(StorageLocation location)
 #elif defined (Q_OS_WIN)
         path = deCONZ::appArgumentString(QLatin1String("--ddf-root"),
                                          deCONZ::getStorageLocation(deCONZ::ApplicationsLocation) + QLatin1String("/devices"));
+#elif defined (__APPLE__)
+        path = deCONZ::appArgumentString(QLatin1String("--ddf-root"),
+                                         deCONZ::getStorageLocation(deCONZ::ApplicationsLocation) + QLatin1String("Resources/devices"));
 #else
         path = deCONZ::appArgumentString(QLatin1String("--ddf-root"),
                                          deCONZ::getStorageLocation(deCONZ::ApplicationsDataLocation) + QLatin1String("/devices"));
