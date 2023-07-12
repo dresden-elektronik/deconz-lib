@@ -8,7 +8,7 @@
  *
  */
 
-#include <Windows.h>
+#include <windows.h>
 #include "u_library.h"
 
 void *U_library_open(const char *filename)
