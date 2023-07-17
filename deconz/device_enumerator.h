@@ -12,6 +12,7 @@
  */
 
 #include <QObject>
+#include <QString>
 #include <vector>
 #include "deconz/declspec.h"
 
@@ -45,7 +46,8 @@ struct DeviceEntry
     quint16 idProduct;
 };
 
-QString DECONZ_DLLSPEC DEV_StableDevicePath(const QString &path);
+DECONZ_DLLSPEC QString DEV_StableDevicePath(const QString &path);
+DECONZ_DLLSPEC QString DEV_ResolvedDevicePath(const QString &path);
 
 class DeviceEnumeratorPrivate;
 

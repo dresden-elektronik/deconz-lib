@@ -16,14 +16,14 @@
 #ifdef _WIN32
 
 #ifdef U_SHARED_LIB
-    #define DECONZ_DLLSPEC     __declspec(dllexport)
+    #define DECONZ_DLLSPEC  __declspec(dllexport)
 #else
-   #define DECONZ_DLLSPEC __declspec(dllimport)
+    #define DECONZ_DLLSPEC  __declspec(dllimport)
 #endif
 
 #else // Unix
 
-  #define DECONZ_DLLSPEC
+    #define DECONZ_DLLSPEC
 
 #endif
 

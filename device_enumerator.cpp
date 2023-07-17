@@ -14,22 +14,30 @@
 #include <QTimer>
 #include <vector>
 
+#ifdef __linux__
+  #define PL_LINUX 1
+#endif
+
 #ifdef USE_QEXT_SERIAL
   #include <QSerialPortInfo>
 #endif // USE_QEXT_SERIAL
 
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 #include <fcntl.h>
 #include <unistd.h>
+/* for popen to check udevadm */
+#include <sys/stat.h>
+#include <dirent.h>
 #endif
 
 #include "deconz/aps_controller.h"
 #include "deconz/dbg_trace.h"
 #include "deconz/device_enumerator.h"
 #include "deconz/util.h"
+#include "deconz/u_sstream.h"
 
 // Firmware version related (32-bit field)
 #define FW_PLATFORM_MASK          0x0000FF00UL
@@ -73,10 +81,150 @@ class DeviceEnumeratorPrivate
 {
 public:
     std::vector<DeviceEntry> devs;
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
     QString stableDevicePath; // /dev/serial/by-id/...
 #endif
 };
+
+#ifdef PL_LINUX
+/*  Query USB info via udevadm
+    This works also when /dev/by-id .. is symlinks aren't available
+
+    udevadm info --name=/dev/ttyACM0
+*/
+static int query_udevadm(const char *query, U_SStream *ss_out)
+{
+    FILE *f;
+    size_t n;
+    U_SStream ss;
+    U_SStream ss_query;
+    char ch;
+    char buf[4096 * 4];
+    char path[256];
+    char query_path[256];
+    char serial[64];
+    long udevadm_version;
+    unsigned i;
+    unsigned dev_major;
+
+    DIR *dir;
+    struct dirent *entry;
+    struct stat statbuf;
+
+    U_sstream_init(&ss_query, query_path, sizeof(query_path));
+    U_sstream_put_str(&ss_query, query);
+
+    udevadm_version = 0;
+    /* check if udevadm is available */
+    f = popen("udevadm --version", "r");
+    if (f)
+    {
+        n = fread(&buf[0], 1, sizeof(buf) - 1, f);
+        if (n > 0 && n < 10)
+        {
+            buf[n] = '\0';
+            U_sstream_init(&ss, &buf[0], (unsigned)n);
+            udevadm_version = U_sstream_get_long(&ss);
+            if (ss.status != U_SSTREAM_OK)
+                udevadm_version = 0;
+        }
+        pclose(f);
+    }
+
+    if (udevadm_version == 0)
+        return 0;
+
+    dir = opendir("/dev");
+
+    if (!dir)
+        return 0;
+
+    serial[0] = '\0';
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_type != DT_CHR)
+            continue;
+
+        U_sstream_init(&ss, &path[0], sizeof(path));
+        U_sstream_put_str(&ss, "/dev/");
+        U_sstream_put_str(&ss, &entry->d_name[0]);
+
+        if (stat(ss.str, &statbuf) != 0)
+            continue;
+
+        dev_major = statbuf.st_rdev >> 8;
+        if (dev_major != 166 && dev_major != 188) /* ConBee I / II / III */
+            continue;
+
+        U_sstream_init(&ss, &buf[0], sizeof(buf));
+        U_sstream_put_str(&ss, "udevadm info --name=");
+        U_sstream_put_str(&ss, "/dev/");
+        U_sstream_put_str(&ss, &entry->d_name[0]);
+
+        f = popen(ss.str, "r");
+        if (f)
+        {
+            n = fread(&buf[0], 1, sizeof(buf) - 1, f);
+            pclose(f);
+
+            if (n > 0 && n < sizeof(buf) - 1)
+            {
+                buf[n] = '\0';
+
+                DBG_WriteString(DBG_INFO_L2, &buf[0]);
+
+                U_sstream_init(&ss, &buf[0], (unsigned)n);
+                while (U_sstream_find(&ss, "E: ") && U_sstream_remaining(&ss) > 8)
+                {
+                    ss.pos += 3;
+
+                    if (U_sstream_starts_with(&ss, "ID_USB_SERIAL_SHORT=") && U_sstream_find(&ss, "="))
+                    {
+                        i = 0;
+                        ss.pos += 1;
+                        serial[0] = '\0';
+
+                        for (;ss.pos < ss.len && i + 1 < sizeof(serial); ss.pos++, i++)
+                        {
+                            ch = U_sstream_peek_char(&ss);
+                            if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))
+                            {
+                                serial[i] = ch;
+                                serial[i + 1] = '\0';
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        ss_query.pos = 0;
+                        if (serial[0] && U_sstream_find(&ss_query, &serial[0]))
+                        {
+                            break;
+                        }
+
+                        serial[0] = '\0';
+                    }
+                }
+            }
+        }
+
+        if (serial[0])
+            break;
+    }
+
+    closedir(dir);
+
+    if (serial[0] && path[0])
+    {
+        U_sstream_put_str(ss_out, &path[0]);
+    }
+
+    return ss_out->pos != 0 ? 1 : 0;
+}
+#endif // PL_LINUX
 
 DeviceEnumerator::DeviceEnumerator(QObject *parent) :
     QObject(parent),
@@ -103,7 +251,7 @@ const std::vector<DeviceEntry> &DeviceEnumerator::getList() const
     return d_ptr2->devs;
 }
 
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
 bool tryCreateDeviceFile(const QString &path)
 {
     if (QFile::exists(path))
@@ -143,7 +291,7 @@ bool tryCreateDeviceFile(const QString &path)
 
     if (!allow166 && !allow188)
     {
-        DBG_Printf(DBG_INFO, "dev can't create file: %s via mknod (missing permissions)\n", qPrintable(path));
+        DBG_Printf(DBG_INFO_L2, "dev can't create file: %s via mknod (missing permissions)\n", qPrintable(path));
     }
     else if (!ok)
     {
@@ -172,29 +320,62 @@ bool tryCreateDeviceFile(const QString &path)
 }
 #endif
 
+// Fallback when the /dev/serial/by-id/... path doesn't exist or points into the void.
+// Lookup the serial number in /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE1948474-if00
+// via udevadm
+QString DEV_ResolvedDevicePath(const QString &path)
+{
+#ifdef PL_LINUX
+    if (path.startsWith(QLatin1String("/dev/serial/by-id")))
+    {
+        QFileInfo fi(path);
+        if (fi.exists() && fi.isSymLink() && QFile::exists(fi.symLinkTarget()))
+        {
+            return fi.canonicalFilePath();
+        }
+
+        // fallback udevadm
+        U_SStream ssOut;
+        char resolvedPath[256] = {0};
+        U_sstream_init(&ssOut, &resolvedPath[0], sizeof(resolvedPath));
+        if (query_udevadm(qPrintable(path), &ssOut))
+        {
+            return QString(&resolvedPath[0]);
+        }
+
+    }
+#endif
+    return QString();
+}
+
+// /dev/ttyACM0
+// /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE1948474-if00
 QString DEV_StableDevicePath(const QString &path)
 {
-#ifdef Q_OS_LINUX
-    QDir devDir("/dev/serial/by-id");
-    const auto entries = devDir.entryInfoList();
-
-    QString path1 = path;
-
+#ifdef PL_LINUX
+    if (path.startsWith(QLatin1String("/dev/serial/by-id"))) // todo this could be any symlink or string containing serial number
     {
-        const QFileInfo fi(path1);
-        if (fi.isSymLink())
+        QString path1;
+        path1 = DEV_ResolvedDevicePath(path);
+        if (!path1.isEmpty())
         {
-            path1 = fi.canonicalFilePath();
+            // symlink might not exist but can be resolved
+            return path;
         }
     }
 
+    // reverse: try do find symlink for /dev/ttyAMCx devices
+    QDir devDir("/dev/serial/by-id");
+    const auto entries = devDir.entryInfoList();
+
     for (const auto &fi : entries)
     {
-        if (fi.isSymLink() && fi.symLinkTarget() == path1)
+        if (fi.isSymLink() && fi.symLinkTarget() == path && QFile::exists(path))
         {
             return fi.absoluteFilePath();
         }
     }
+
 #endif
     return path;
 }
@@ -209,7 +390,7 @@ bool DeviceEnumerator::listSerialPorts()
 
     const QString comPort = deCONZ::appArgumentString(QLatin1String("--dev"), QString());
 
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
     // ConBee II
     // /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE1948474-if00
     if (d->stableDevicePath.isEmpty() && !comPort.isEmpty())
@@ -226,11 +407,7 @@ bool DeviceEnumerator::listSerialPorts()
             DBG_Printf(DBG_INFO, "COM: use stable device path %s\n", qPrintable(d->stableDevicePath));
         }
     }
-    QFileInfo fiComPort(comPort);
-#else
-    QFileInfo fiComPort;
 #endif
-
 
     const auto availPorts = QSerialPortInfo::availablePorts();
     auto i = availPorts.begin();
@@ -250,7 +427,7 @@ bool DeviceEnumerator::listSerialPorts()
             DeviceEntry dev;
             bool found = false;
 
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
             if (i->vendorIdentifier() == 0x1cf1 || i->vendorIdentifier() == 0x0403)
             {
                 // inside Docker check if we are allowed to create via cgroups
@@ -279,7 +456,7 @@ bool DeviceEnumerator::listSerialPorts()
                 dev.idVendor = 0x0403;
                 dev.idProduct = 0x6015;
                 dev.serialNumber = i->serialNumber();
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
                 dev.path = d->stableDevicePath;
 #endif
             }
@@ -290,7 +467,7 @@ bool DeviceEnumerator::listSerialPorts()
                 dev.idProduct = 0x0030;
                 dev.serialNumber = i->serialNumber();
                 dev.friendlyName = QLatin1String("ConBee II");
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
                 dev.path = d->stableDevicePath;
 #endif
             }
@@ -303,6 +480,8 @@ bool DeviceEnumerator::listSerialPorts()
             {
                 // Raspbian default UART
                 QFileInfo fi("/dev/serial0");
+                QFileInfo fiComPort(comPort);
+
                 if (fiComPort.exists() && (i->systemLocation() == comPort || (fiComPort.isSymLink() && fiComPort.symLinkTarget() == i->systemLocation())))
                 {
                     DBG_Printf(DBG_INFO, "dev %s\n", qPrintable(i->systemLocation()));
@@ -340,16 +519,24 @@ bool DeviceEnumerator::listSerialPorts()
                 dev.friendlyName = i->portName();
             }
 
-            if (dev.path.isEmpty())
+            if (dev.path.isEmpty() && !d->stableDevicePath.isEmpty())
+            {
+                dev.path = d->stableDevicePath;
+            }
+            else
             {
                 dev.path = DEV_StableDevicePath(i->systemLocation());
             }
 
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
             // after re-enumeration the stable device path might not be there
-            if (dev.path == d->stableDevicePath && !QFile::exists(dev.path))
+            if (dev.path == d->stableDevicePath)
             {
-                dev.path = i->systemLocation();
+                QString path1 = DEV_ResolvedDevicePath(d->stableDevicePath);
+                if (path1.isEmpty() || !QFile::exists(path1))
+                {
+                    dev.path = i->systemLocation();
+                }
             }
 #endif
 
@@ -371,7 +558,7 @@ bool DeviceEnumerator::listSerialPorts()
 
             if (found)
             {
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
                 if (!comPort.isEmpty() && d->stableDevicePath == dev.path)
                 {
                     d->devs.clear();
@@ -384,7 +571,7 @@ bool DeviceEnumerator::listSerialPorts()
         }
     }
 
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
     // QSerialPortInfo::availablePorts() might fail to detect a device.
     // If a specific device is given via --dev and exists, return it anyway.
     if (d->devs.empty() && !comPort.isEmpty() && QFile::exists(comPort))

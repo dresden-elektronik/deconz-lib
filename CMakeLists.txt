@@ -25,6 +25,7 @@ set(PUB_INCLUDE_FILES
     deconz/util.h
     deconz/u_rand32.h
     deconz/u_library.h
+    deconz/u_sstream.h
     deconz/zcl.h
     deconz/zdp_descriptors.h
     deconz/zdp_profile.h
@@ -48,6 +49,7 @@ add_library(${PROJECT_NAME} SHARED
     green_power_controller.cpp
     util.cpp
     u_rand32.c
+    u_sstream.c
     qhttprequest_compat.cpp
     zcl.cpp
     zdp_descriptors.cpp
@@ -73,7 +75,7 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-    DECONZ_DLLSPEC=DECONZ_DECL_EXPORT
+#    DECONZ_DLLSPEC=DECONZ_DECL_EXPORT
     U_SHARED_LIB
     USE_QEXT_SERIAL
 )
