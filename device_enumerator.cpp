@@ -519,11 +519,13 @@ bool DeviceEnumerator::listSerialPorts()
                 dev.friendlyName = i->portName();
             }
 
+#ifdef PL_LINUX
             if (dev.path.isEmpty() && !d->stableDevicePath.isEmpty())
             {
                 dev.path = d->stableDevicePath;
             }
             else
+#endif
             {
                 dev.path = DEV_StableDevicePath(i->systemLocation());
             }
