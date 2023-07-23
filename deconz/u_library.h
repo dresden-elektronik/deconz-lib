@@ -10,30 +10,35 @@
  * Upstream repository: https://git.sr.ht/~cryo/u_library
  */
 
-#ifndef _U_LIBRARY_H
-#define _U_LIBRARY_H
+#ifndef U_LIBRARY_H
+#define U_LIBRARY_H
 
+#ifndef U_LIBAPI
 #ifdef _WIN32
-  #ifdef U_SHARED_LIB
-    #define U_EXPORT __declspec(dllexport)
-  #else
-    #define U_EXPORT __declspec(dllimport)
+  #ifdef USE_ULIB_SHARED
+    #define U_LIBAPI  __declspec(dllimport)
   #endif
-#else /* UNIX ... */
-    #define U_EXPORT
+  #ifdef BUILD_ULIB_SHARED
+    #define U_LIBAPI  __declspec(dllexport)
+  #endif
+#endif
+#endif /* ! defined(U_LIBAPI) */
+
+#ifndef U_LIBAPI
+#define U_LIBAPI
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-U_EXPORT void *U_library_open(const char *filename);
-U_EXPORT void U_library_close(void *handle);
-U_EXPORT void *U_library_symbol(void *handle, const char *symbol);
+U_LIBAPI void *U_library_open(const char *filename);
+U_LIBAPI void U_library_close(void *handle);
+U_LIBAPI void *U_library_symbol(void *handle, const char *symbol);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _U_LIBRARY_H */
+#endif /* U_LIBRARY_H */
 

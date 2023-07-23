@@ -11,11 +11,11 @@
  *
  */
 
-#undef DECONZ_DLLSPEC
+#ifndef DECONZ_DLLSPEC
 
 #ifdef _WIN32
 
-#ifdef U_SHARED_LIB
+#ifdef BUILD_ULIB_SHARED
     #define DECONZ_DLLSPEC  __declspec(dllexport)
 #else
     #define DECONZ_DLLSPEC  __declspec(dllimport)
@@ -27,6 +27,7 @@
 
 #endif
 
+#endif /* ! defined DECONZ_DLLSPEC */
 
 
 #endif // DECONZ_DECLSPEC_H

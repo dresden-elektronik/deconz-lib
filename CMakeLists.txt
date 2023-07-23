@@ -69,14 +69,11 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_NAME deCONZ)
 
-#add_library(deCONZ::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-#    DECONZ_DLLSPEC=DECONZ_DECL_EXPORT
-    U_SHARED_LIB
+    BUILD_ULIB_SHARED
     USE_QEXT_SERIAL
 )
 

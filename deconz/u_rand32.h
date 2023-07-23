@@ -11,19 +11,32 @@
  *
  */
 
-#include "deconz/declspec.h"
+#ifndef U_LIBAPI
+#ifdef _WIN32
+  #ifdef USE_ULIB_SHARED
+    #define U_LIBAPI  __declspec(dllimport)
+  #endif
+  #ifdef BUILD_ULIB_SHARED
+    #define U_LIBAPI  __declspec(dllexport)
+  #endif
+#endif
+#endif /* ! defined(U_LIBAPI) */
+
+#ifndef U_LIBAPI
+#define U_LIBAPI
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*! Sets pseudo random number generator seed value. */
-DECONZ_DLLSPEC void U_rand32_seed(unsigned seed);
+U_LIBAPI void U_rand32_seed(unsigned seed);
 
 
 /*! Returns 32-bit random number.
     This must NOT be used for security related random data. */
-DECONZ_DLLSPEC unsigned U_rand32(void);
+U_LIBAPI unsigned U_rand32(void);
 
 #ifdef __cplusplus
 }
