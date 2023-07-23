@@ -181,6 +181,7 @@ namespace deCONZ
         ZclDefaultResponseId              = 0x0b,
         ZclDiscoverAttributesId           = 0x0c,
         ZclDiscoverAttributesResponseId   = 0x0d,
+        ZclReadAttributesStructuredId     = 0x0e,
         ZclWriteAttributesStructuredId    = 0x0f,
         ZclWriteAttributesStructuredResponseId  = 0x10
     };
