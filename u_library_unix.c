@@ -14,7 +14,74 @@
 void *U_library_open(const char *filename)
 {
 	int flags;
-	flags = RTLD_LAZY;
+    unsigned len;
+    unsigned dot_pos;
+    char major;
+    void *result;
+    char path[512];
+
+    flags = RTLD_LAZY;
+    dot_pos = 0;
+    result = 0;
+
+    if (filename)
+    {
+        for (len = 0; filename[len]; len++)
+        {
+            if (dot_pos == 0 && filename[len] == '.')
+                dot_pos = len;
+
+            if ((len + 16) > sizeof(path))
+            {
+                /* error unexpected long path */
+                return 0;
+            }
+
+            path[len] = filename[len];
+        }
+
+        path[len] = '\0';
+
+        if (dot_pos == 0) /* add platform extension */
+        {
+#ifdef __APPLE__
+            path[len++] = '.';
+            path[len++] = 'd';
+            path[len++] = 'y';
+            path[len++] = 'l';
+            path[len++] = 'i';
+            path[len++] = 'b';
+            path[len] = '\0';
+#else
+            path[len++] = '.';
+            path[len++] = 's';
+            path[len++] = 'o';
+            path[len] = '\0';
+#endif
+        }
+
+        result = dlopen(path, flags);
+
+        /*  libname.so didn't work
+            try libname.so.1 .. libname.so.9 */
+        if (!result && dot_pos == 0)
+        {
+            dot_pos = len;
+            /* NOTE this is restricted to small major version numbers */
+            for (major = '0'; result == 0 && major < '9'; major++)
+            {
+                len = dot_pos;
+                path[len++] = '.';
+                path[len++] = major;
+                path[len++] = '\0';
+
+                result = dlopen(path, flags);
+            }
+        }
+
+        return result;
+    }
+
 	return dlopen(filename, flags);
 }
 
