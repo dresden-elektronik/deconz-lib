@@ -113,7 +113,7 @@ void DBG_WriteString(int level, const char *str)
 
             const uint64_t msCount = msSinceEpoch();
 
-            if (sprintf(dbgLine2 + 8, ":%03ld ", static_cast<long int>(msCount % 1000)) != 5)
+            if (snprintf(dbgLine2 + 8, sizeof(dbgLine2) - 16, ":%03ld ", static_cast<long int>(msCount % 1000)) != 5)
             {
                 return;
             }
