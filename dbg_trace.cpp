@@ -273,7 +273,7 @@ int DBG_StringFromItem(const int item, char *buf, size_t buflen)
     return -1;
 }
 
-void DECONZ_DLLSPEC DBG_RegisterCallback(void (*cb)(int, const char*))
+void DBG_RegisterCallback(void (*cb)(int, const char*))
 {
     dbgCallback = cb;
 }
