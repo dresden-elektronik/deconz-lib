@@ -9,6 +9,7 @@
  */
 
 #include <QCoreApplication>
+#include <QDataStream>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -2906,7 +2907,6 @@ void ZclDataBase::load(const QString &dbfile)
 
                         domain.setName(name);
                         domain.setDescription(descr);
-                        domain.setIcon(QIcon());
 
                         // check for properitary clusters
                         if (xmlAttributes.hasAttribute(QLatin1String("useZcl")))

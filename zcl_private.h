@@ -12,6 +12,7 @@
 #define ZCL_PRIVATE_H
 
 #include <QString>
+#include <QIcon>
 #include <cinttypes>
 #include "deconz/declspec.h"
 
@@ -151,11 +152,10 @@ class DECONZ_DLLSPEC ZclDomain
 {
 public:
     ZclDomain() : m_useZcl(true) { }
-    ZclDomain(const QString &name, const QString &description, const QIcon &icon) :
+    ZclDomain(const QString &name, const QString &description) :
         m_useZcl(true),
         m_name(name),
-        m_description(description),
-        m_icon(icon)
+        m_description(description)
     {
 #ifdef ZCL_LOAD_DBG
         qDebug("Domain: %s %04X-%04X -- %s", qPrintable(name),  qPrintable(description));
@@ -167,8 +167,6 @@ public:
     void setName(const QString &name) { m_name = name; }
     const QString &description() const { return m_description; }
     void setDescription(const QString &description) { m_description = description; }
-    const QIcon &icon() const { return m_icon; }
-    void setIcon(const QIcon &icon) { m_icon = icon; }
     const QHash<uint32_t, ZclCluster> &inClusters() const { return m_inClusters; }
     const QHash<uint32_t, ZclCluster> &outClusters() const { return m_outClusters; }
     bool isValid() const { return !m_name.isEmpty(); }
@@ -178,7 +176,6 @@ private:
     bool m_useZcl;
     QString m_name;
     QString m_description;
-    QIcon m_icon;
     QHash<uint32_t, ZclCluster> m_inClusters;
     QHash<uint32_t, ZclCluster> m_outClusters;
 };

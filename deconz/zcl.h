@@ -11,15 +11,11 @@
  *
  */
 
-#include <QIcon>
-#include <QList>
-#include <QHash>
+#include <QDataStream>
 #include <QVariant>
 #include <QStringList>
-#include <QDebug>
 #include <deconz/types.h>
 #include "deconz/declspec.h"
-
 
 //#define ZCL_LOAD_DBG
 //#define ZCL_LOAD_DBG_COMMAND
