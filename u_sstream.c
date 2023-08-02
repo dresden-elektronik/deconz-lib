@@ -381,6 +381,97 @@ void U_sstream_put_long(U_SStream *ss, long num)
     ss->str[ss->pos] = '\0';
 }
 
+/*  Outputs the signed 64-bit integer 'num' as ASCII string.
+
+    -9223372036854775807 .. 9223372036854775807
+
+    \param num signed number
+*/
+void U_sstream_put_longlong(U_SStream *ss, long long num)
+{
+    int i;
+    int pos;
+    int remainder;
+    long long n;
+    unsigned char buf[24];
+
+    if (ss->status != U_SSTREAM_OK)
+        return;
+
+    /* sign + max digits + NUL := 21 bytes on 64-bit */
+
+    n = num;
+    if (n < 0)
+    {
+        ss->str[ss->pos++] = '-';
+        n = -n;
+    }
+
+    pos = 0;
+    do
+    {
+        remainder = n % 10;
+        n = n / 10;
+        buf[pos++] = '0' + remainder;
+    }
+    while (n);
+
+    if (ss->len - ss->pos < (unsigned)pos + 1) /* not enough space */
+    {
+        ss->status = U_SSTREAM_ERR_NO_SPACE;
+        return;
+    }
+
+    for (i = pos; i > 0; i--) /* reverse copy */
+    {
+        ss->str[ss->pos++] = buf[i - 1];
+    }
+
+    ss->str[ss->pos] = '\0';
+}
+
+/*  Outputs the unsigned 64-bit integer 'num' as ASCII string.
+
+    0 .. 18446744073709551615
+
+    \param num unsigned number
+*/
+void U_sstream_put_ulonglong(U_SStream *ss, unsigned long long num)
+{
+    int i;
+    int pos;
+    int remainder;
+    unsigned char buf[24];
+
+    if (ss->status != U_SSTREAM_OK)
+        return;
+
+    /* max digits + NUL := 21 bytes on 64-bit */
+
+
+    pos = 0;
+    do
+    {
+        remainder = num % 10;
+        num = num / 10;
+        buf[pos++] = '0' + remainder;
+    }
+    while (num);
+
+    if (ss->len - ss->pos < (unsigned)pos + 1) /* not enough space */
+    {
+        ss->status = U_SSTREAM_ERR_NO_SPACE;
+        return;
+    }
+
+    for (i = pos; i > 0; i--) /* reverse copy */
+    {
+        ss->str[ss->pos++] = buf[i - 1];
+    }
+
+    ss->str[ss->pos] = '\0';
+}
+
 static const char _hex_table[16] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 };

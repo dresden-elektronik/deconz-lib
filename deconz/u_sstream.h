@@ -70,6 +70,8 @@ U_LIBAPI int U_sstream_find(U_SStream *ss, const char *str);
 U_LIBAPI void U_sstream_seek(U_SStream *ss, unsigned pos);
 U_LIBAPI void U_sstream_put_str(U_SStream *ss, const char *str);
 U_LIBAPI void U_sstream_put_long(U_SStream *ss, long num);
+U_LIBAPI void U_sstream_put_longlong(U_SStream *ss, long long num);
+U_LIBAPI void U_sstream_put_ulonglong(U_SStream *ss, unsigned long long num);
 U_LIBAPI void U_sstream_put_hex(U_SStream *ss, const void *data, unsigned size);
 
 U_LIBAPI long U_strtol(const char *s, unsigned len, const char **endp, int *err);
