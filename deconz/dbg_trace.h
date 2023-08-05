@@ -10,8 +10,6 @@
  * the LICENSE.txt file.
  *
  */
-
-#include <deconz/types.h>
 #include "deconz/declspec.h"
 
 #define DBG_INFO     0x00000001
@@ -78,7 +76,7 @@ class DebugLog
 extern "C" {
 #endif
 
-DECONZ_DLLSPEC void DBG_Init(FILE *logfile);
+DECONZ_DLLSPEC void DBG_Init(void *logfile);
 DECONZ_DLLSPEC void DBG_Destroy();
 DECONZ_DLLSPEC void DBG_Flush();
 DECONZ_DLLSPEC void DBG_FlushLazy();
@@ -95,10 +93,10 @@ DECONZ_DLLSPEC int DBG_Printf1(int level, const char *format, ...)
 DECONZ_DLLSPEC void DBG_Enable(int item);
 DECONZ_DLLSPEC void DBG_Disable(int item);
 DECONZ_DLLSPEC int DBG_IsEnabled(int item);
-DECONZ_DLLSPEC uint8_t * DBG_HexToAscii(const uint8_t *hex, uint8_t length, uint8_t *ascii);
+DECONZ_DLLSPEC unsigned char * DBG_HexToAscii(const void *hex, unsigned length, void *ascii);
 DECONZ_DLLSPEC void DBG_RegisterCallback(void (*cb)(int, const char*));
 DECONZ_DLLSPEC int DBG_ItemFromString(const char *item);
-DECONZ_DLLSPEC int DBG_StringFromItem(const int item, char *buf, size_t buflen);
+DECONZ_DLLSPEC int DBG_StringFromItem(const int item, char *buf, unsigned long buflen);
 
 #ifdef __cplusplus
 }

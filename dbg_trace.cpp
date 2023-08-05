@@ -163,12 +163,12 @@ int DBG_Printf1(int level, const char *format, ...)
     return -1;
 }
 
-void DBG_Init(FILE *logfile)
+void DBG_Init(void *logfile)
 {
     assert(_dbg == nullptr);
     _dbg = new DbgContext;
 
-    logFP = logfile;
+    logFP = (FILE*)logfile;
     dbgEnable = 0;
     dbgLine2[sizeof(dbgLine2) - 4] = '.';
     dbgLine2[sizeof(dbgLine2) - 3] = '.';
@@ -253,7 +253,7 @@ int DBG_ItemFromString(const char *item)
     \returns  0 - on sucess
              -1 - on error
  */
-int DBG_StringFromItem(const int item, char *buf, size_t buflen)
+int DBG_StringFromItem(const int item, char *buf, unsigned long buflen)
 {
     for (const auto &i : levelStrings)
     {
@@ -299,17 +299,25 @@ int DBG_IsEnabled(int item)
 
     \returns a pointer to the last byte (zero).
  */
-uint8_t *DBG_HexToAscii(const uint8_t *hex, uint8_t length, uint8_t *ascii)
+unsigned char *DBG_HexToAscii(const void *hex, unsigned length, void *ascii)
 {
-    uint8_t i;
+    unsigned i;
+    unsigned char *h;
+    unsigned char *a;
+
+    if (!hex || length < 3 || !ascii)
+        return 0;
+
+    h = (unsigned char*)hex;
+    a = (unsigned char*)ascii;
 
     for (i = 0; i < length; i++)
     {
-        *ascii++ = lookup[(hex[i] & 0xf0) >> 4];
-        *ascii++ = lookup[hex[i] & 0xf];
+        *a++ = lookup[(h[i] & 0xf0) >> 4];
+        *a++ = lookup[h[i] & 0xf];
     }
 
-    *ascii = '\0';
+    *a = '\0';
 
-    return ascii;
+    return a;
 }
