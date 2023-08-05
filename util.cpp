@@ -173,7 +173,7 @@ QString DECONZ_DLLSPEC appArgumentString(const QString &arg, const QString &defa
     return defaultValue;
 }
 
-time_t current_time_t()
+long long current_time_t()
 {
     return time(0);
 }
