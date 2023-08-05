@@ -43,13 +43,14 @@
 
 #define CAST_LLD(x) ((long long)(x))
 #define CAST_LLU(x) ((unsigned long long)(x))
-#define CAST_MAC(m) ((unsigned long long)(m))
 
 #define DBG_Assert(e) ((e) ? true : (DBG_Printf1(DBG_ERROR, "%s,%d: assertion '%s' failed\n", Q_FUNC_INFO, __LINE__, #e), false))
 
+#define FMT_MAC_CAST(mac) ((unsigned long long)(mac))
 #define FMT_MAC "0x%016llX"
 #define FMT_CLUSTER "0x%04" PRIX16
 #define FMT_ATTR "0x%04" PRIX16
+
 
 #define DBG_MEASURE_START(MEAS_ID) \
     QElapsedTimer MEAS_ID##measTimer; \
