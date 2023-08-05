@@ -11,6 +11,7 @@
  *
  */
 
+#include <vector>
 #include <QDataStream>
 #include <QVariant>
 #include <QStringList>

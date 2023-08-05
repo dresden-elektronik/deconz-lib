@@ -65,6 +65,12 @@
     It is possible to send and receive ZCL based packets as well as non-ZCL based proprietary ones.
 */
 
+#include <array>
+#include <QByteArray>
+#include <QFlags>
+#include <QString>
+#include <QMetaType>
+
 #include "deconz/types.h"
 #include "deconz/timeref.h"
 #include "deconz/declspec.h"

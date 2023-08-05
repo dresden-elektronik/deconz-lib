@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <QDirIterator>
+#include <QTextStream>
 #include <QTimer>
 #include <vector>
 

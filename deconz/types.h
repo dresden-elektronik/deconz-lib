@@ -26,14 +26,6 @@
 
 #ifdef __cplusplus
 
-#include <QObject>
-#include <QMetaType>
-#include <QFlags>
-#include <QDebug>
-#include <QPointF>
-#include <QTime>
-#include <array>
-
 #define CL_URL_SCHEME "cluster"
 #define CL_ITEM_ENDPOINT "ep"
 #define CL_ITEM_EXT_ADDR "ieee"
@@ -338,11 +330,11 @@ namespace deCONZ
         uint8_t u8;
         uint16_t u16;
         uint32_t u32;
-        quint64 u64;
+        uint64_t u64;
         int8_t s8;
         int16_t s16;
         int32_t s32;
-        qint64 s64;
+        int64_t s64;
         float real;
     };
 
@@ -350,14 +342,14 @@ namespace deCONZ
     {
         bool unbind; //!< true if this is a unbind request
         ZdpState rspState;
-        quint64 srcAddr;
+        uint64_t srcAddr;
         uint8_t srcEndpoint;
         uint16_t clusterId;
         uint8_t dstAddrMode;
-        quint64 dstExtAddr;
+        uint64_t dstExtAddr;
         uint8_t dstEndpoint;
         uint16_t dstGroupAddr; //!< only set then dstAddrMode = 0x1 (group)
-        quint64 binderAddr;
+        uint64_t binderAddr;
     };
 
     enum RequestId
@@ -372,22 +364,6 @@ namespace deCONZ
         ReqActiveEndpoints,
         ReqMgmtLqi,
         ReqMgmtBind,
-//        ReqMatchDescriptor = 14,
-//        ReqFirmwareVersion = 1,
-//        ReqBind = 2,
-//        ReqUnbind = 3,
-//        ReqNwkAddressList = 5,
-//        ReqNetworkRejoin = 7,
-//        ReqComplexDescriptor = 11,
-//        ReqLqiRssi = 17,
-//        ReqBroadcastDE = 18,
-//        ReqZclDiscoverAttributes = 19,
-//        ReqZclReadAttributes = 20,
-//        ReqNeighborTable = 21,
-//        ReqNeighborTableSize,
-//        ReqNetworkDiscovery,
-//        ReqNetworkConfigSet,
-//        ReqLinkKey,
 
         ReqMaxItems
     };
@@ -449,80 +425,7 @@ namespace deCONZ
         GraphLinkType    = 2,
         GraphSocketType  = 3
     };
-
-    class Enumeration
-    {
-    public:
-        Enumeration() :
-            m_id(0xFFFF)
-        {
-        }
-
-        Enumeration(uint id, const QString &name) :
-            m_id(id),
-            m_name(name)
-        {
-        }
-        uint id() const { return m_id; }
-        const QString &name() const { return m_name; }
-        void setValue(uint key, const QString &name) { m_values[key] = name; }
-        QString getValueName(uint key)
-        {
-            if (m_values.contains(key))
-                return m_values[key];
-
-            return QString();
-        }
-        const QHash<uint, QString> &values() const { return m_values; }
-
-    private:
-        QHash<uint, QString> m_values;
-        uint m_id;
-        QString m_name;
-    };
-
 } // namespace deCONZ
-
-struct NodeInfo
-{
-    NodeInfo() = default;
-    bool operator ==(const NodeInfo &other) { return id == other.id; }
-    bool operator <(const NodeInfo &other) const;
-
-    bool isValid() const { return (id && data && g); }
-    quint32 id = 0; //!< Internal unique id.
-    deCONZ::zmNode *data = nullptr; //!< The node data.
-    zmgNode *g = nullptr; //!< The QGraphicsItem representation.
-    QPointF pos;
-};
-
-Q_DECLARE_METATYPE(NodeInfo)
-
-class zme : public QObject
-{
-    Q_OBJECT
-
-    Q_ENUMS(NodeServerMask)
-
-public:
-    /*!
-        Servermask flags in Node Descriptor.
-     */
-    enum NodeServerFlag
-    {
-        PrimaryTrustCenter       = (1 << 0), //!<
-        BackupTrustCenter        = (1 << 1), //!<
-        PrimaryBindingTableCache = (1 << 2), //!<
-        BackupBindingTableCache  = (1 << 3), //!<
-        PrimaryDiscoveryCache    = (1 << 4), //!<
-        BackupDiscoveryCache     = (1 << 5), //!<
-        NetworkManager           = (1 << 6), //!<
-    };
-
-    Q_DECLARE_FLAGS(NodeServerFlags, NodeServerFlag)
-};
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(zme::NodeServerFlags)
 
 #endif /* __cplusplus */
 

@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QFile>
 #include <QStack>
+#include <QTextStream>
 #include <QXmlStreamReader>
 #include <array>
 #include <tuple>
@@ -524,7 +525,7 @@ bool ZclAttribute::writeToStream(QDataStream &stream) const
     case Zcl32BitUint: { stream << d->m_numericValue.u32; ok = true; } break;
     case ZclIeeeAddress:
     case Zcl64BitData:
-    case Zcl64BitUint: { stream << d->m_numericValue.u64; ok = true; } break;
+    case Zcl64BitUint: { stream << (quint64)d->m_numericValue.u64; ok = true; } break;
 
     case Zcl8BitEnum:
         if (d->m_numericValue.u32 <= 0xFFul)
@@ -545,7 +546,7 @@ bool ZclAttribute::writeToStream(QDataStream &stream) const
     case Zcl8BitInt:  { stream << d->m_numericValue.s8; ok = true; } break;
     case Zcl16BitInt: { stream << d->m_numericValue.s16; ok = true; } break;
     case Zcl32BitInt: { stream << d->m_numericValue.s32; ok = true; } break;
-    case Zcl64BitInt: { stream << d->m_numericValue.s64; ok = true; } break;
+    case Zcl64BitInt: { stream << (qint64)d->m_numericValue.s64; ok = true; } break;
 
     case Zcl24BitInt:
     case Zcl40BitInt:
@@ -855,8 +856,10 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
 
     case Zcl64BitInt:
     {
-        stream >> d->m_numericValue.s64;
-        d->m_value = qint64(d->m_numericValue.s64);
+        qint64 s64;
+        stream >> s64;
+        d->m_numericValue.s64 = s64;
+        d->m_value = s64;
     }
         break;
 
@@ -937,8 +940,10 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
     case Zcl64BitData:
     case Zcl64BitUint:
     {
-        stream >> d->m_numericValue.u64;
-        d->m_value = quint64(d->m_numericValue.u64);
+        quint64 u64;
+        stream >> u64;
+        d->m_numericValue.u64 = u64;
+        d->m_value = u64;
     }
     break;
 
@@ -1013,12 +1018,12 @@ bool ZclAttribute::writeReportableChangeToStream(QDataStream &stream) const
     case Zcl8BitUint:  stream << reportableChange().u8; return true;
     case Zcl16BitUint: stream << reportableChange().u16; return true;
     case Zcl32BitUint: stream << reportableChange().u32; return true;
-    case Zcl64BitUint: stream << reportableChange().u64; return true;
+    case Zcl64BitUint: stream << (quint64)reportableChange().u64; return true;
 
     case Zcl8BitInt:  stream << reportableChange().s8; return true;
     case Zcl16BitInt: stream << reportableChange().s16; return true;
     case Zcl32BitInt: stream << reportableChange().s32; return true;
-    case Zcl64BitInt: stream << reportableChange().s64; return true;
+    case Zcl64BitInt: stream << (qint64)reportableChange().s64; return true;
 
     case Zcl24BitUint:
     case Zcl40BitUint:
@@ -1068,13 +1073,15 @@ bool ZclAttribute::readReportableChangeFromStream(QDataStream &stream)
     }
 
     d->m_reportableChange.u64 = 0;
+    qint64 s64;
+    quint64 u64;
 
     switch (dataType())
     {
     case Zcl8BitUint:  stream >> d->m_reportableChange.u8; break;
     case Zcl16BitUint:  stream >> d->m_reportableChange.u16; break;
     case Zcl32BitUint:  stream >> d->m_reportableChange.u32; break;
-    case Zcl64BitUint:  stream >> d->m_reportableChange.u64; break;
+    case Zcl64BitUint:  stream >> u64; d->m_reportableChange.u64 = u64; break;
 
     case Zcl24BitUint:
     case Zcl40BitUint:
@@ -1095,7 +1102,7 @@ bool ZclAttribute::readReportableChangeFromStream(QDataStream &stream)
     case Zcl8BitInt:  stream >> d->m_reportableChange.s8; break;
     case Zcl16BitInt:  stream >> d->m_reportableChange.s16; break;
     case Zcl32BitInt:  stream >> d->m_reportableChange.s32; break;
-    case Zcl64BitInt:  stream >> d->m_reportableChange.s64; break;
+    case Zcl64BitInt:  stream >> s64; d->m_reportableChange.s64 = s64; break;
 
     case ZclBoolean:   stream >> d->m_reportableChange.u8; break;
 

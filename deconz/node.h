@@ -11,6 +11,7 @@
  *
  */
 
+#include <vector>
 #include <deconz/types.h>
 #include <deconz/aps.h>
 #include <deconz/binding_table.h>

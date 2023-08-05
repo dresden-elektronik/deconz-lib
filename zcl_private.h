@@ -19,6 +19,37 @@
 namespace deCONZ
 {
 
+class Enumeration
+{
+public:
+    Enumeration() :
+        m_id(0xFFFF)
+    {
+    }
+
+    Enumeration(uint id, const QString &name) :
+        m_id(id),
+        m_name(name)
+    {
+    }
+    uint id() const { return m_id; }
+    const QString &name() const { return m_name; }
+    void setValue(uint key, const QString &name) { m_values[key] = name; }
+    QString getValueName(uint key)
+    {
+        if (m_values.contains(key))
+            return m_values[key];
+
+        return QString();
+    }
+    const QHash<uint, QString> &values() const { return m_values; }
+
+private:
+    QHash<uint, QString> m_values;
+    uint m_id;
+    QString m_name;
+};
+
 class ZclAttributePrivate
 {
 public:

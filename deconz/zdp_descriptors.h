@@ -15,6 +15,32 @@
 #include <deconz/zcl.h>
 #include <deconz/types.h>
 
+class zme : public QObject
+{
+    Q_OBJECT
+
+    Q_ENUMS(NodeServerMask)
+
+public:
+    /*!
+        Servermask flags in Node Descriptor.
+     */
+    enum NodeServerFlag
+    {
+        PrimaryTrustCenter       = (1 << 0), //!<
+        BackupTrustCenter        = (1 << 1), //!<
+        PrimaryBindingTableCache = (1 << 2), //!<
+        BackupBindingTableCache  = (1 << 3), //!<
+        PrimaryDiscoveryCache    = (1 << 4), //!<
+        BackupDiscoveryCache     = (1 << 5), //!<
+        NetworkManager           = (1 << 6), //!<
+    };
+
+    Q_DECLARE_FLAGS(NodeServerFlags, NodeServerFlag)
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(zme::NodeServerFlags)
+
 /*!
     \defgroup zdp ZDP
     \brief ZigBee Device Profile (ZDP).
