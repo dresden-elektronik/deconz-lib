@@ -28,6 +28,17 @@
 #endif
 
 #endif /* ! defined DECONZ_DLLSPEC */
+/*
+ *    API_DEPRECATED void foo();
+ */
+
+#ifdef __GNUC__
+#define API_DEPRECATED __attribute__ ((deprecated))
+#elif defined(_MSC_VER)
+#define API_DEPRECATED __declspec(deprecated)
+#else
+#define API_DEPRECATED
+#endif
 
 
 #endif // DECONZ_DECLSPEC_H
