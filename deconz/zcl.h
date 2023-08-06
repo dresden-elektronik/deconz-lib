@@ -765,7 +765,7 @@ Shorthand for creating type safe manufacturer codes from numbers but without cas
         void setListSize(int listSize);
         /* \endcond */
         /*! Returns the last read time. */
-        time_t lastRead() const;
+        int64_t lastRead() const;
         /*! Returns true if the attribute is read only. */
         bool isReadonly() const;
         /*! Returns true if the attribute is mandatory. */

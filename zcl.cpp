@@ -1453,7 +1453,7 @@ void ZclAttribute::setValue(const QVariant &value)
     }
 }
 
-void ZclAttribute::setLastRead(time_t time)
+void ZclAttribute::setLastRead(int64_t time)
 {
     Q_D(ZclAttribute);
     d->m_lastRead = time;
@@ -1489,7 +1489,7 @@ void ZclAttribute::setListSize(int listSize)
     d->m_listSize = listSize;
 }
 
-time_t ZclAttribute::lastRead() const
+int64_t ZclAttribute::lastRead() const
 {
     Q_D(const ZclAttribute);
     return d->m_lastRead;

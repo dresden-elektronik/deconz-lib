@@ -33,7 +33,6 @@ enum StorageLocation
 
 int DECONZ_DLLSPEC appArgumentNumeric(const QString &arg, int defaultValue);
 QString DECONZ_DLLSPEC appArgumentString(const QString &arg, const QString &defaultValue);
-API_DEPRECATED long long DECONZ_DLLSPEC current_time_t();
 QString DECONZ_DLLSPEC jsonStringFromMap(const QVariantMap &map);
 QString DECONZ_DLLSPEC jsonStringFromList(const QVariantList &ls);
 QString DECONZ_DLLSPEC getStorageLocation(StorageLocation location);

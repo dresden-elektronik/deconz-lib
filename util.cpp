@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <memory>
 #include "deconz/dbg_trace.h"
-#include <time.h>
 #include "deconz/util.h"
 
 #ifdef _WIN32
@@ -171,11 +170,6 @@ QString DECONZ_DLLSPEC appArgumentString(const QString &arg, const QString &defa
     }
 
     return defaultValue;
-}
-
-long long current_time_t()
-{
-    return time(0);
 }
 
 QString jsonStringFromMap(const QVariantMap &map)

@@ -81,7 +81,7 @@ public:
     NumericUnion m_numericValue{}; //!< Numeric data.
     std::vector<int> m_valuePos;
     QStringList m_valueNames;
-    time_t m_lastRead = (time_t)-1;
+    int64_t m_lastRead = -1;
 
     /*!
          If this is a list here is the attribute id wich holds the list size.
