@@ -353,15 +353,13 @@ void U_sstream_put_long(U_SStream *ss, long num)
 
     n = num;
     if (n < 0)
-    {
         ss->str[ss->pos++] = '-';
-        n = -n;
-    }
 
     pos = 0;
     do
     {
         remainder = n % 10;
+        remainder = remainder < 0 ? -remainder : remainder;
         n = n / 10;
         buf[pos++] = '0' + remainder;
     }
@@ -402,15 +400,13 @@ void U_sstream_put_longlong(U_SStream *ss, long long num)
 
     n = num;
     if (n < 0)
-    {
         ss->str[ss->pos++] = '-';
-        n = -n;
-    }
 
     pos = 0;
     do
     {
         remainder = n % 10;
+        remainder = remainder < 0 ? -remainder : remainder;
         n = n / 10;
         buf[pos++] = '0' + remainder;
     }
