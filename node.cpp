@@ -46,11 +46,6 @@ Node::~Node()
     d_ptr = 0;
 }
 
-Address &Node::address()
-{
-    return d_ptr->address;
-}
-
 const Address &Node::address() const
 {
     return d_ptr->address;

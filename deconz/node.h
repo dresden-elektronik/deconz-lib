@@ -128,8 +128,6 @@ public:
     virtual ~Node();
     /*! Returns the current node state. */
     virtual CommonState state() const = 0;
-    /*! Returns the modifyable node address. */
-    deCONZ::Address &address();
     /*! Returns the const node address. */
     const deCONZ::Address &address() const;
     /*! Returns true if the node is a coordinator. */
