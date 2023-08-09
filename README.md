@@ -3,6 +3,8 @@
 This library is used by deCONZ core and plugins.
 The compiled library is part of the deCONZ package.
 
+Doxgen generated documentation: [https://phoscon.de/deconz-cpp](https://phoscon.de/deconz-cpp/index.html)
+
 **Work in Progress**
 
 Previously the library was a fixed part of deCONZ and build via QMake. The goal of this repository is making the library code Open Source and to replace the deconz-dev.deb package. This repository will be referenced in the REST-API plugin CMake file to automatically fetch the C/C++ headers.
