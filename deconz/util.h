@@ -1,3 +1,8 @@
+/*!
+  \file util.h
+  Utility functions and classes for various purposes.
+ */
+
 #ifndef DECONZ_UTIL_H
 #define DECONZ_UTIL_H
 
@@ -11,11 +16,26 @@
  *
  */
 
+/*!
+    \defgroup utils Utils
+    \section utils_intro Utility functions and classes.
+    \brief Utility functions and classes for various purposes.
+
+    The module is work in progress and meant to replace all platform specific and
+    Qt based functionality.
+*/
+
 #include <QString>
 #include <QMetaType> // QVariantList, QVariantMap
 #include "deconz/declspec.h"
 
+/*! \brief Various data types as defined in ZigBee ZCL specification.
+    \ingroup utils
+
+    To handle data type in payloads use deCONZ::ZclDataTypeId_t
+*/
 namespace deCONZ {
+
 
 enum StorageLocation
 {
@@ -43,14 +63,8 @@ bool DECONZ_DLLSPEC isVirtualMachine();
 
 extern "C" {
 
-/*! Convert utf-8 to unicode code point.
-
-    Returns pointer to remainder of text. 'codepoint' is a valid codepoint
-    or set to U_INVALID_UNICODE_CODEPOINT for invalid utf8.
- */
 DECONZ_DLLSPEC const char * U_utf8_codepoint(const char *text, unsigned *codepoint);
 
 } // extern "C"
-
 
 #endif // DECONZ_UTIL_H

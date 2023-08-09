@@ -32,6 +32,11 @@ typedef unsigned __int32  uint32_t;
 #include <stdint.h>
 #endif
 
+/*! \ingroup utils
+
+    @{
+ */
+
 static QString resolvePath(const QString &origPath)
 {
 #ifdef Q_OS_UNIX
@@ -83,6 +88,12 @@ public:
 };
 
 namespace deCONZ {
+
+/*! @addtogroup utils
+
+    @{
+ */
+
 
 /*! Get the value of a commandline argument
 
@@ -425,8 +436,14 @@ bool isVirtualMachine()
     return cpuid.ECX() & (1 << 31); // hypervisor bit set
 }
 
+//! @} end of group utils
 } // namespace deCONZ
 
+/*! \brief Convert utf-8 to unicode code point.
+
+    Returns pointer to remainder of text. 'codepoint' is a valid codepoint
+    or set to U_INVALID_UNICODE_CODEPOINT for invalid utf8.
+ */
 const char * U_utf8_codepoint(const char *text, unsigned *codepoint)
 {
     unsigned cp;
