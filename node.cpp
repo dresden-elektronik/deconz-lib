@@ -10,6 +10,7 @@
 
 #include "deconz/node.h"
 #include "deconz/dbg_trace.h"
+#include "deconz/ustring.h"
 #include "node_private.h"
 
 namespace deCONZ {

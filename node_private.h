@@ -16,6 +16,7 @@ namespace deCONZ {
 class NodePrivate
 {
 public:
+    UString extAddrStr;
     Address address;
     MacCapabilities m_macCapa;
     NodeDescriptor m_nodeDescr;
