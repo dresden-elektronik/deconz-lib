@@ -29,6 +29,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_rand32.h
     deconz/u_library.h
     deconz/u_sstream.h
+    deconz/ustring.h
     deconz/zcl.h
     deconz/zdp_descriptors.h
     deconz/zdp_profile.h
@@ -55,6 +56,7 @@ add_library(${PROJECT_NAME} SHARED
     util.cpp
     u_rand32.c
     u_sstream.c
+    ustring.cpp
     qhttprequest_compat.cpp
     zcl.cpp
     zdp_descriptors.cpp
@@ -99,6 +101,11 @@ target_include_directories(${PROJECT_NAME}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/deconz>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
+
+
+enable_testing()
+
+add_subdirectory(tests)
 
 #include(GNUInstallDirs)
 
