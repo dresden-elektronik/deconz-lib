@@ -20,6 +20,7 @@ set(PUB_INCLUDE_FILES
     deconz/device_enumerator.h
     deconz/green_power.h
     deconz/green_power_controller.h
+    deconz/nanbox.h
     deconz/touchlink.h
     deconz/touchlink_controller.h
     deconz/timeref.h
@@ -50,6 +51,7 @@ add_library(${PROJECT_NAME} SHARED
     device_enumerator.cpp
     green_power.cpp
     green_power_controller.cpp
+    nanbox.c
     util.cpp
     u_rand32.c
     u_sstream.c
