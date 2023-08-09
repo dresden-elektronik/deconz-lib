@@ -30,10 +30,6 @@
 
    The library is standalone without using libc.
    Upstream repository: https://git.sr.ht/~cryo/u_sstream
-
-   Compile time options:
-
-       U_SSTREAM_NO_DEPRECATED   don't compile deprecated functions
 */
 
 typedef enum
@@ -69,6 +65,25 @@ U_LIBAPI int U_sstream_starts_with(U_SStream *ss, const char *str);
 U_LIBAPI int U_sstream_find(U_SStream *ss, const char *str);
 U_LIBAPI void U_sstream_seek(U_SStream *ss, unsigned pos);
 U_LIBAPI void U_sstream_put_str(U_SStream *ss, const char *str);
+
+/** Limited JSON friendly double to string conversion.
+ *
+ * Important: Only the values in range -2^53-1 to 2^53-1 are supported!
+ * E.g. [+-]9007199254740991. Values out of this range result in
+ * U_SSTREAM_ERR_RANGE status. For full range support use snprintf() instead.
+ *
+ * Special values:
+ *
+ *     -0  -->  0
+ *    NaN  -->  null
+ *   -Inf  --> -1e99999
+ *   +Inf  -->  1e99999
+ *
+ * \param ss the stringt stream context.
+ * \param num a double value.
+ * \param precision of fractional part (1..18).
+ */
+U_LIBAPI void U_sstream_put_double(U_SStream *ss, double num, int precision);
 U_LIBAPI void U_sstream_put_long(U_SStream *ss, long num);
 U_LIBAPI void U_sstream_put_longlong(U_SStream *ss, long long num);
 U_LIBAPI void U_sstream_put_ulonglong(U_SStream *ss, unsigned long long num);
@@ -76,26 +91,6 @@ U_LIBAPI void U_sstream_put_hex(U_SStream *ss, const void *data, unsigned size);
 
 U_LIBAPI long U_strtol(const char *s, unsigned len, const char **endp, int *err);
 U_LIBAPI double U_strtod(const char *str, unsigned len, const char **endp, int *err);
-
-#ifndef U_SSTREAM_NO_DEPRECATED
-
-#ifdef __LP64__
-  typedef int u_sstream_i32;
-  typedef unsigned u_sstream_u32;
-#else
-  typedef long u_sstream_i32;
-  typedef unsigned long u_sstream_u32;
-#endif
-
-/* Following functions depend on libc and are defined in u_sstream_lib.c. */
-U_LIBAPI const char *U_sstream_next_token(U_SStream *ss, const char *delim); /* deprecated */
-U_LIBAPI void U_sstream_put_i32(U_SStream *ss, u_sstream_i32 num); /* deprecated */
-U_LIBAPI void U_sstream_put_u32(U_SStream *ss, u_sstream_u32 num); /* deprecated */
-U_LIBAPI u_sstream_i32 U_sstream_get_i32(U_SStream *ss, int base); /* deprecated */
-U_LIBAPI float U_sstream_get_f32(U_SStream *ss);
-U_LIBAPI double U_sstream_get_f64(U_SStream *ss);
-
-#endif /* U_SSTREAM_NO_DEPRECATED */
 
 #ifdef __cplusplus
 }
