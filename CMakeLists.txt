@@ -12,6 +12,8 @@ find_package(Qt5 COMPONENTS Core Gui SerialPort REQUIRED)
 set(PUB_INCLUDE_FILES
     deconz/aps.h
     deconz/aps_controller.h
+    deconz/atom.h
+    deconz/atom_table.h
     deconz/binding_table.h
     deconz/buffer_helper.h
     deconz/dbg_trace.h
@@ -41,6 +43,7 @@ add_library(${PROJECT_NAME} SHARED
 
     aps.cpp
     aps_controller.cpp
+    atom_table.c
     binding_table.cpp
     buffer_helper.c
     dbg_trace.cpp
