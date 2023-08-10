@@ -122,7 +122,7 @@ static US_Header *US_AllocForStrlen(unsigned len)
 UString::UString()
 {
     static_assert(sizeof(NB_NanBox) == sizeof(d_word), "UString::d_word size is wrong");
-    d_word = NB_TYPE_NULL;
+    d_word = NB_VALUE_NULL;
 }
 
 UString::UString(const UString &other)
@@ -211,7 +211,7 @@ UString &UString::operator=(UString &&other) noexcept
 
     US_Free(d_word);
     d_word = other.d_word;
-    other.d_word = NB_TYPE_NULL;
+    other.d_word = NB_VALUE_NULL;
 
     return *this;
 }
@@ -472,7 +472,6 @@ UString UString::number(double num, char f, int prec)
 UString UString::fromAtom(AT_Atom atom)
 {
     UString s;
-    unsigned i;
     AT_AtomIndex ati;
 
     if (atom.len && atom.len <= NB_ATOM_PTR_MASK)
