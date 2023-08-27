@@ -757,7 +757,7 @@ Shorthand for creating type safe manufacturer codes from numbers but without cas
         void setValue(const QVariant &value);
         /*! Sets the \p time where the attribute was last read. */
         /* \cond INTERNAL_SYMBOLS */
-        void setLastRead(time_t time);
+        void setLastRead(int64_t time);
         uint16_t listSizeAttribute() const;
         void setListSizeAttribute(uint16_t id);
         bool isList() const;
