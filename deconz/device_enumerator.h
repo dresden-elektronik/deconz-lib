@@ -26,7 +26,8 @@ struct DeviceEntry
     DeviceEntry() :
         failedConnects(0),
         idVendor(0),
-        idProduct(0)
+        idProduct(0),
+        baudrate(0)
     {
 
     }
@@ -44,6 +45,7 @@ struct DeviceEntry
     int failedConnects;
     quint16 idVendor;
     quint16 idProduct;
+    int baudrate;
 };
 
 DECONZ_DLLSPEC QString DEV_StableDevicePath(const QString &path);

@@ -444,6 +444,13 @@ bool DeviceEnumerator::listSerialPorts()
                 dev.idVendor = i->vendorIdentifier();
                 dev.idProduct = i->productIdentifier();
                 dev.serialNumber = i->serialNumber();
+
+                if (i->description() == QLatin1String("ConBee III"))
+                {
+                    dev.friendlyName = i->description();
+                    dev.baudrate = 115200;
+                    found = true;
+                }
             }
             else if (i->description() == QLatin1String("FT230X Basic UART"))
             {
@@ -468,6 +475,7 @@ bool DeviceEnumerator::listSerialPorts()
                 dev.idProduct = 0x0030;
                 dev.serialNumber = i->serialNumber();
                 dev.friendlyName = QLatin1String("ConBee II");
+                dev.baudrate = 115200;
 #ifdef PL_LINUX
                 dev.path = d->stableDevicePath;
 #endif
