@@ -293,7 +293,7 @@ Shorthand for creating type safe ZCL data type identifiers from numbers but with
 \endcode
  */
     inline namespace literals {
-        constexpr ZclDataTypeId_t DECONZ_DLLSPEC operator ""_dtid(unsigned long long id)
+        constexpr ZclDataTypeId_t operator ""_dtid(unsigned long long id)
         {
             return ZclDataTypeId_t(static_cast<quint8>(id));
         }
@@ -407,7 +407,7 @@ Shorthand for creating type safe ZCL command identifiers from numbers but withou
 \endcode
  */
     inline namespace literals {
-        constexpr ZclCommandId_t DECONZ_DLLSPEC operator ""_cmdid(unsigned long long id)
+        constexpr ZclCommandId_t operator ""_cmdid(unsigned long long id)
         {
             return ZclCommandId_t(static_cast<quint8>(id));
         }
@@ -595,7 +595,7 @@ Shorthand for creating type safe ZCL attribute identifiers from numbers but with
 \endcode
  */
     inline namespace literals {
-        constexpr ZclAttributeId_t DECONZ_DLLSPEC operator ""_atid(unsigned long long id)
+        constexpr ZclAttributeId_t operator ""_atid(unsigned long long id)
         {
             return ZclAttributeId_t(static_cast<quint16>(id));
         }
@@ -664,7 +664,7 @@ Shorthand for creating type safe manufacturer codes from numbers but without cas
 \endcode
  */
     inline namespace literals {
-        constexpr ManufacturerCode_t DECONZ_DLLSPEC operator ""_mfcode(unsigned long long mfcode)
+        constexpr ManufacturerCode_t operator ""_mfcode(unsigned long long mfcode)
         {
             return ManufacturerCode_t(static_cast<quint16>(mfcode));
         }
@@ -1155,7 +1155,7 @@ Shorthand for creating type safe cluster identifiers from numbers but without ca
 \endcode
  */
     inline namespace literals {
-        constexpr ZclClusterId_t DECONZ_DLLSPEC operator ""_clid(unsigned long long id)
+        constexpr ZclClusterId_t operator ""_clid(unsigned long long id)
         {
             return ZclClusterId_t(static_cast<quint16>(id));
         }
