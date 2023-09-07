@@ -60,27 +60,27 @@ SystemTimeRef DECONZ_DLLSPEC systemTimeRef() noexcept;
  */
 SteadyTimeRef DECONZ_DLLSPEC steadyTimeRef() noexcept;
 
-inline bool DECONZ_DLLSPEC isValid(SteadyTimeRef t) { return t.ref != 0; }
-inline bool DECONZ_DLLSPEC isValid(SystemTimeRef t) { return t.ref != 0; }
+inline bool isValid(SteadyTimeRef t) { return t.ref != 0; }
+inline bool isValid(SystemTimeRef t) { return t.ref != 0; }
 
-inline bool DECONZ_DLLSPEC operator<(SystemTimeRef a, SystemTimeRef b) { return a.ref < b.ref; }
+inline bool operator<(SystemTimeRef a, SystemTimeRef b) { return a.ref < b.ref; }
 
-inline bool DECONZ_DLLSPEC operator==(SteadyTimeRef a, SteadyTimeRef b) { return a.ref == b.ref; }
-inline bool DECONZ_DLLSPEC operator!=(SteadyTimeRef a, SteadyTimeRef b) { return a.ref != b.ref; }
-inline bool DECONZ_DLLSPEC operator<(SteadyTimeRef a, SteadyTimeRef b) { return a.ref < b.ref; }
-inline bool DECONZ_DLLSPEC operator<=(SteadyTimeRef a, SteadyTimeRef b) { return a.ref <= b.ref; }
+inline bool operator==(SteadyTimeRef a, SteadyTimeRef b) { return a.ref == b.ref; }
+inline bool operator!=(SteadyTimeRef a, SteadyTimeRef b) { return a.ref != b.ref; }
+inline bool operator<(SteadyTimeRef a, SteadyTimeRef b) { return a.ref < b.ref; }
+inline bool operator<=(SteadyTimeRef a, SteadyTimeRef b) { return a.ref <= b.ref; }
 
-inline TimeMs DECONZ_DLLSPEC operator-(SteadyTimeRef a, SteadyTimeRef b) { TimeMs res; res.val = a.ref - b.ref; return res; }
-inline SteadyTimeRef DECONZ_DLLSPEC operator+(SteadyTimeRef a, TimeMs t) { return SteadyTimeRef{a.ref + t.val}; }
-inline SteadyTimeRef DECONZ_DLLSPEC operator+(SteadyTimeRef a, TimeSeconds t) { return SteadyTimeRef{a.ref + t.val * 1000}; }
+inline TimeMs operator-(SteadyTimeRef a, SteadyTimeRef b) { TimeMs res; res.val = a.ref - b.ref; return res; }
+inline SteadyTimeRef operator+(SteadyTimeRef a, TimeMs t) { return SteadyTimeRef{a.ref + t.val}; }
+inline SteadyTimeRef operator+(SteadyTimeRef a, TimeSeconds t) { return SteadyTimeRef{a.ref + t.val * 1000}; }
 
-inline bool DECONZ_DLLSPEC operator<(TimeMs a, TimeMs b) { return a.val < b.val; }
-inline bool DECONZ_DLLSPEC operator<(TimeSeconds a, TimeSeconds b) { return a.val < b.val; }
-inline bool DECONZ_DLLSPEC operator<(TimeSeconds a, TimeMs b) { return a.val * 1000 < b.val; }
-inline bool DECONZ_DLLSPEC operator<(TimeMs a, TimeSeconds b) { return a.val < b.val * 1000; }
+inline bool operator<(TimeMs a, TimeMs b) { return a.val < b.val; }
+inline bool operator<(TimeSeconds a, TimeSeconds b) { return a.val < b.val; }
+inline bool operator<(TimeSeconds a, TimeMs b) { return a.val * 1000 < b.val; }
+inline bool operator<(TimeMs a, TimeSeconds b) { return a.val < b.val * 1000; }
 
-inline TimeSeconds DECONZ_DLLSPEC operator*(TimeSeconds a, int factor) { TimeSeconds res; res.val = a.val * factor; return res; }
-inline TimeMs DECONZ_DLLSPEC operator*(TimeMs a, int factor) { TimeMs res; res.val = a.val * factor; return res; }
+inline TimeSeconds operator*(TimeSeconds a, int factor) { TimeSeconds res; res.val = a.val * factor; return res; }
+inline TimeMs operator*(TimeMs a, int factor) { TimeMs res; res.val = a.val * factor; return res; }
 
 } // namespace deCONZ
 
