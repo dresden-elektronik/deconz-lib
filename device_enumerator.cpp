@@ -451,6 +451,15 @@ bool DeviceEnumerator::listSerialPorts()
                     dev.baudrate = 115200;
                     found = true;
                 }
+#ifdef _WIN32
+                // TODO use code from GCFFlasher4, this is here is only a workaround
+                if (i->description() == QLatin1String("USB Serial Port"))
+                {
+                    dev.friendlyName = QLatin1String("ConBee III");
+                    dev.baudrate = 115200;
+                    found = true;
+                }
+#endif
             }
             else if (i->description() == QLatin1String("FT230X Basic UART"))
             {
