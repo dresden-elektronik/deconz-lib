@@ -650,6 +650,67 @@ bool ZclAttribute::writeToStream(QDataStream &stream) const
     return ok;
 }
 
+
+/* Latin1 0x00-0xff is valid encoding
+ * Check for printable characters, since these are expected in ZCL string attributes
+ */
+static int isLikelyLatin1String(const char *str, unsigned len)
+{
+    unsigned i;
+    unsigned ok_chars = 0;
+
+    for (i = 0; i < len; i++)
+    {
+        unsigned char ch = (unsigned char)str[i];
+
+        // reject NUL, SOH, STX, EOT, ENQ, ACK, BEL, BS
+        if      (ch == '\t')               { ok_chars++; }
+        else if (ch == '\n')               { ok_chars++; }
+        else if (ch == '\r')               { ok_chars++; }
+        else if (ch == 0x7f)               { break; } // delete DEL
+        else if (ch < 0x20)                { break; } // ASCII control chars
+        else if (ch >= 0x80 && ch <= 0x9f) { break; } // Latin1 control chars
+        else                               { ok_chars++; }
+    }
+
+    return ok_chars == len ? 1 : 0;
+}
+
+static int latin1ToUtf8Opinionated(const char *lat, unsigned len, unsigned char *out, unsigned outlen)
+{
+    unsigned i;
+    unsigned w; // out write position
+
+    w = 0;
+    out[0] = '\0';
+
+    for (i = 0; i < len; i++)
+    {
+        unsigned char ch = lat[i];
+
+        if      (ch == 0xa0) ch = ' '; // non breakable space to ASCII space
+        else if (ch == 0xad) ch = '-'; // soft hyphen to ASCII minus
+
+        if (ch < 128 && (outlen - w) > 1)
+        {
+            out[w++] = ch;
+            out[w] = '\0';
+        }
+        else if (ch > 128 && (outlen - w) > 2)
+        {
+            out[w++] = 0xc0 | ch >> 6;
+            out[w++] = (0x80 | (ch & 0x3f));
+            out[w] = '\0';
+        }
+        else
+        {
+            return 0; // unlikely
+        }
+    }
+
+    return 1;
+}
+
 bool ZclAttribute::readFromStream(QDataStream &stream)
 {
     if (stream.atEnd())
@@ -703,7 +764,7 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
 
     case ZclCharacterString:
     {
-        quint8 len;
+        uint8_t len;
         stream >> len;
 
         if (stream.status() == QDataStream::ReadPastEnd)
@@ -730,6 +791,21 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
 
         buf[len] = '\0';
 
+        // strip trailing zero terminators
+        for (; len > 0;)
+        {
+            if (buf[len - 1] != '\0')
+                break;
+
+            len--;
+        }
+
+        if (len == 0)
+        {
+            d->m_value = QString();
+            return true;
+        }
+
         unsigned codepoint = U_INVALID_UNICODE_CODEPOINT;
         const char *p = &buf[0];
         const char *pnonprint = nullptr;
@@ -743,6 +819,18 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
 
             if (!pnonprint && codepoint == 0)
                 pnonprint = p - 1;
+        }
+
+        // in rare cases latin1 encoding has been seen, check this
+        if (codepoint == U_INVALID_UNICODE_CODEPOINT && isLikelyLatin1String(buf, len))
+        {
+            unsigned char utf8buf[256];
+
+            if (latin1ToUtf8Opinionated(buf, len, utf8buf, sizeof(utf8buf)))
+            {
+                d->m_value = QString::fromUtf8((const char*)&utf8buf[0]);
+                return true;
+            }
         }
 
         if (codepoint == U_INVALID_UNICODE_CODEPOINT)
