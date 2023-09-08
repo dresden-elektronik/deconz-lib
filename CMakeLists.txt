@@ -29,6 +29,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_rand32.h
     deconz/u_library.h
     deconz/u_sstream.h
+    deconz/u_threads.h
     deconz/ustring.h
     deconz/zcl.h
     deconz/zdp_descriptors.h
@@ -70,7 +71,9 @@ add_library(${PROJECT_NAME} SHARED
 
 if (WIN32)
     target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
+    target_sources(${PROJECT_NAME} PRIVATE u_threads_win32.c)
 else()
+    target_sources(${PROJECT_NAME} PRIVATE u_threads_pthreads.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
 endif()
 
