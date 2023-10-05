@@ -88,32 +88,17 @@ public:
 };
 
 #ifdef PL_LINUX
-/*  Query USB info via udevadm
-    This works also when /dev/by-id .. is symlinks aren't available
+static bool hasUdevadm = false;
 
-    udevadm info --name=/dev/ttyACM0
-*/
-static int query_udevadm(const char *query, U_SStream *ss_out)
+static bool initHasUdevadm(void)
 {
     FILE *f;
     size_t n;
     U_SStream ss;
-    U_SStream ss_query;
-    char ch;
-    char buf[4096 * 4];
-    char path[256];
-    char query_path[256];
-    char serial[64];
-    long udevadm_version;
+
     unsigned i;
-    unsigned dev_major;
-
-    DIR *dir;
-    struct dirent *entry;
-    struct stat statbuf;
-
-    U_sstream_init(&ss_query, query_path, sizeof(query_path));
-    U_sstream_put_str(&ss_query, query);
+    char buf[128];
+    long udevadm_version;
 
     udevadm_version = 0;
     /* check if udevadm is available */
@@ -133,7 +118,43 @@ static int query_udevadm(const char *query, U_SStream *ss_out)
     }
 
     if (udevadm_version == 0)
+        return false;
+
+    return true;
+}
+
+/*  Returns /dev/ttyUSBx | /dev/ttyACMx for a serial number
+    This works also when /dev/by-id .. is symlinks aren't available
+
+    udevadm info --name=/dev/ttyACM0
+
+    query: /dev/by-id/.. path or simply any string containing the serial number
+    ss_out: here the device path like  /dev/ttyACMx path will be placed if matched
+
+*/
+static int query_udevadm_dev_path_of_serial(const char *query, U_SStream *ss_out)
+{
+    if (!hasUdevadm)
         return 0;
+
+    FILE *f;
+    size_t n;
+    U_SStream ss;
+    U_SStream ss_query;
+    char ch;
+    char buf[4096 * 4];
+    char path[256];
+    char query_path[256];
+    char serial[64];
+    unsigned i;
+    unsigned dev_major;
+
+    DIR *dir;
+    struct dirent *entry;
+    struct stat statbuf;
+
+    U_sstream_init(&ss_query, query_path, sizeof(query_path));
+    U_sstream_put_str(&ss_query, query);
 
     dir = opendir("/dev");
 
@@ -225,6 +246,143 @@ static int query_udevadm(const char *query, U_SStream *ss_out)
 
     return ss_out->pos != 0 ? 1 : 0;
 }
+
+/*  Fills in all USB device info from udev
+    This replaces QSerialPortInfo on Linux.
+
+    udevadm info --name=/dev/ttyACM0
+*/
+static int query_udevadm_dev_info(const char *dev_path, deCONZ::DeviceEntry *dev)
+{
+    if (!hasUdevadm)
+        return 0;
+
+    FILE *f;
+    size_t n;
+    U_SStream ss;
+    U_SStream ss_query;
+    char ch;
+    char buf[4096 * 4];
+    char serial[64];
+    unsigned i;
+    unsigned dev_major;
+    struct stat statbuf;
+
+    int matches = 0;
+
+    if (stat(dev_path, &statbuf) != 0)
+        return 0;
+
+    dev_major = statbuf.st_rdev >> 8;
+    if (dev_major != 166 && dev_major != 188) /* ConBee I / II / III */
+        return 0;
+
+    U_sstream_init(&ss, &buf[0], sizeof(buf));
+    U_sstream_put_str(&ss, "udevadm info --name=");
+    U_sstream_put_str(&ss, dev_path);
+
+    f = popen(ss.str, "r");
+    if (f)
+    {
+        n = fread(&buf[0], 1, sizeof(buf) - 1, f);
+        pclose(f);
+
+        if (n > 0 && n < sizeof(buf) - 1)
+        {
+            buf[n] = '\0';
+
+            dev->path = QString::fromLatin1(dev_path);
+
+            // DBG_WriteString(DBG_INFO_L2, &buf[0]);
+
+            U_sstream_init(&ss, &buf[0], (unsigned)n);
+            while (U_sstream_find(&ss, "E: ") && U_sstream_remaining(&ss) > 8)
+            {
+                ss.pos += 3;
+
+                if (U_sstream_starts_with(&ss, "ID_USB_MODEL_ID=") && U_sstream_find(&ss, "="))
+                {
+                    ss.pos += 1;
+                    dev->idProduct = strtoull(&ss.str[ss.pos], 0, 16);
+                }
+                else if (U_sstream_starts_with(&ss, "ID_USB_VENDOR_ID=") && U_sstream_find(&ss, "="))
+                {
+                    ss.pos += 1;
+                    dev->idVendor = strtoull(&ss.str[ss.pos], 0, 16);
+                }
+                else if (U_sstream_starts_with(&ss, "ID_USB_MODEL=") && U_sstream_find(&ss, "="))
+                {
+                    ss.pos += 1;
+                    unsigned start = ss.pos;
+
+                    if (U_sstream_find(&ss, "\n") && ss.pos > start && (ss.pos - start) < 32)
+                    {
+                        for (int k = start; k < ss.pos; k++) // replace underscores with spaces
+                        {
+                            if (ss.str[k] == '_')
+                                ss.str[k] = ' ';
+                        }
+
+                        dev->friendlyName = QString::fromLatin1(&ss.str[start], ss.pos - start);
+                    }
+                }
+                else if (U_sstream_starts_with(&ss, "ID_USB_SERIAL_SHORT=") && U_sstream_find(&ss, "="))
+                {
+                    i = 0;
+                    ss.pos += 1;
+                    serial[0] = '\0';
+
+                    for (;ss.pos < ss.len && i + 1 < sizeof(serial); ss.pos++, i++)
+                    {
+                        ch = U_sstream_peek_char(&ss);
+                        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '-' || ch == '_')
+                        {
+                            serial[i] = ch;
+                            serial[i + 1] = '\0';
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    if (serial[0])
+                    {
+                        // break;
+                        dev->serialNumber = QString::fromLatin1(serial);
+                    }
+
+                    serial[0] = '\0';
+                }
+            }
+        }
+    }
+
+    if (dev->idVendor == 0x1cf1 && dev->idProduct == 0x0030) // ConBee II
+    {
+        dev->baudrate = 115200;
+        return 1;
+    }
+
+    if (dev->friendlyName == QLatin1String("ConBee III"))
+    {
+        dev->baudrate = 115200;
+        return 1;
+    }
+
+    if (dev->idVendor == 0x0403 && dev->idProduct == 0x6015)
+    {
+        if (dev->friendlyName == QLatin1String("FT230X Basic UART"))
+        {
+            dev->friendlyName = QLatin1String("ConBee");
+            dev->baudrate = 38400; // ConBee I
+            return 1;
+        }
+    }
+
+    *dev = {};
+    return 0;
+}
 #endif // PL_LINUX
 
 DeviceEnumerator::DeviceEnumerator(QObject *parent) :
@@ -232,6 +390,10 @@ DeviceEnumerator::DeviceEnumerator(QObject *parent) :
     d_ptr2(new DeviceEnumeratorPrivate)
 {
     instance_ = this;
+
+#ifdef PL_LINUX
+    hasUdevadm = initHasUdevadm();
+#endif
 }
 
 DeviceEnumerator::~DeviceEnumerator()
@@ -339,7 +501,7 @@ QString DEV_ResolvedDevicePath(const QString &path)
         U_SStream ssOut;
         char resolvedPath[256] = {0};
         U_sstream_init(&ssOut, &resolvedPath[0], sizeof(resolvedPath));
-        if (query_udevadm(qPrintable(path), &ssOut))
+        if (query_udevadm_dev_path_of_serial(qPrintable(path), &ssOut))
         {
             return QString(&resolvedPath[0]);
         }
@@ -425,18 +587,24 @@ bool DeviceEnumerator::listSerialPorts()
              i->systemLocation().contains(QLatin1String("ttyACM")) ||
              i->systemLocation().contains(QLatin1String("ttyS")))
         {
-            DeviceEntry dev;
+            DeviceEntry dev {};
             bool found = false;
 
 #ifdef PL_LINUX
-            if (i->vendorIdentifier() == 0x1cf1 || i->vendorIdentifier() == 0x0403)
-            {
-                // inside Docker check if we are allowed to create via cgroups
-                if (!QFile::exists(i->systemLocation()) && tryCreateDeviceFile(i->systemLocation()))
-                {
+//            if (i->vendorIdentifier() == 0x1cf1 || i->vendorIdentifier() == 0x0403)
+//            {
+//                // inside Docker check if we are allowed to create via cgroups
+//                if (!QFile::exists(i->systemLocation()) && tryCreateDeviceFile(i->systemLocation()))
+//                {
 
-                }
+//                }
+//            }
+
+            if (query_udevadm_dev_info(qPrintable(i->systemLocation()), &dev))
+            {
+                found = true;
             }
+            else
 #endif
             if ((i->vendorIdentifier() == 0x1cf1) || // dresden elektronik
                 (i->vendorIdentifier() == 0x0403 && i->productIdentifier() == 0x6015)) // FTDI
