@@ -149,19 +149,19 @@ public:
     /*! Clears all address values to 0. */
     void clear();
     /*! Returns the exended IEEE address as string in form or 0x001122334455667788. */
-    API_DEPRECATED QString toStringExt() const;
+    DECONZ_API_DEPRECATED QString toStringExt() const;
     /*! Returns the network address as string in form or 0x0011. */
-    API_DEPRECATED QString toStringNwk() const;
+    DECONZ_API_DEPRECATED QString toStringNwk() const;
     /*! Returns the groups address as string in form or 0x0011. */
-    API_DEPRECATED QString toStringGroup() const;
+    DECONZ_API_DEPRECATED QString toStringGroup() const;
     /*! Returns true if \p str could be parsed and was set as extended IEEE address.
         \param str a string holding a hexadecimal address
      */
-    API_DEPRECATED bool fromStringExt(const QString &str);
+    DECONZ_API_DEPRECATED bool fromStringExt(const QString &str);
     /*! Returns true if \p str could be parsed and was set as network address.
         \param str a string holding a hexadecimal address
      */
-    API_DEPRECATED bool fromStringNwk(const QString &str);
+    DECONZ_API_DEPRECATED bool fromStringNwk(const QString &str);
     /*! Returns true if nwk(), ext() and group() addresses are equal.
         \param other the address to compare against
      */
