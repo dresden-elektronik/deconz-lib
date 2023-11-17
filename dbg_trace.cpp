@@ -159,7 +159,7 @@ int DBG_Printf1(int level, const char *format, ...)
         DBG_WriteString(level, dbgLine);
         return 0;
     }
-    assert(level == DBG_ERROR);
+    //assert(level == DBG_ERROR);
     return -1;
 }
 
