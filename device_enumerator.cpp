@@ -578,7 +578,12 @@ bool DeviceEnumerator::listSerialPorts()
 
     for (; i != end; ++i)
     {
-        DBG_Printf(DBG_INFO_L2, "COM: %s : %s (0x%04X/0x%04X)\n", qPrintable(i->systemLocation()), qPrintable(i->description()), i->vendorIdentifier(), i->productIdentifier());
+        if (DBG_IsEnabled(DBG_INFO_L2))
+        {
+            DBG_Printf(DBG_INFO_L2, "COM: %s : %s : %s (0x%04X/0x%04X)\n",
+                       qPrintable(i->systemLocation()), qPrintable(i->description()),
+                       qPrintable(i->manufacturer()), i->vendorIdentifier(), i->productIdentifier());
+        }
 
         if ((i->vendorIdentifier() == 0x1cf1) ||  // dresden elektronik
             (i->vendorIdentifier() == 0x0403) ||  // FTDI
@@ -623,8 +628,17 @@ bool DeviceEnumerator::listSerialPorts()
                 // TODO use code from GCFFlasher4, this is here is only a workaround
                 if (i->description() == QLatin1String("USB Serial Port"))
                 {
-                    dev.friendlyName = QLatin1String("ConBee III");
-                    dev.baudrate = 115200;
+                    if (i->serialNumber().startsWith(QLatin1String("DE")))
+                    {
+                        dev.friendlyName = QLatin1String("ConBee III");
+                        dev.baudrate = 115200;
+                    }
+                    else
+                    {
+                        dev.friendlyName = QLatin1String("ConBee");
+                        dev.baudrate = 38400;
+                    }
+
                     found = true;
                 }
 #endif
