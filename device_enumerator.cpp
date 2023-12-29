@@ -45,6 +45,7 @@
 #define FW_PLATFORM_DERFUSB23E0X  0x00000300UL
 #define FW_PLATFORM_AVR           0x00000500UL
 #define FW_PLATFORM_R21           0x00000700UL
+#define FW_PLATFORM_MG21          0x00000900UL
 
 struct DE_Product
 {
@@ -755,6 +756,26 @@ bool DeviceEnumerator::listSerialPorts()
                         dev.friendlyName = QLatin1String(descr->name);
                         break;
                     }
+                }
+            }
+
+            if (deCONZ::ApsController::instance() && dev.friendlyName.startsWith(QChar('C')))
+            {
+                // In Docker containers there is no access to USB descriptors, extract the actual
+                // product from the firmware version encoded platfrom byte.
+                const auto fwVersion = deCONZ::ApsController::instance()->getParameter(ParamFirmwareVersion);
+                const uint32_t platform = fwVersion & FW_PLATFORM_MASK;
+                if (platform == FW_PLATFORM_R21)
+                {
+                    dev.friendlyName = QLatin1String("ConBee II");
+                }
+                else if (platform == FW_PLATFORM_MG21)
+                {
+                    dev.friendlyName = QLatin1String("ConBee III");
+                }
+                else if (platform == FW_PLATFORM_AVR)
+                {
+                    dev.friendlyName = QLatin1String("ConBee");
                 }
             }
 
