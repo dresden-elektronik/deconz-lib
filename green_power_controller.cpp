@@ -9,6 +9,7 @@
  */
 
 #include <QDataStream>
+#include <stdint.h>
 #include <deconz/green_power_controller.h>
 #include <deconz/dbg_trace.h>
 #include <deconz/util.h>
@@ -16,12 +17,17 @@
 static deCONZ::GreenPowerController *_gpCtrl = nullptr;
 static const char *gpdLqi[] = { "poor", "moderate", "high", "excellent" };
 
-static struct GP_Frame
+#define MAX_RECORDS 8
+
+struct GP_Frame
 {
-    quint32 gpdSrcId;
-    quint32 frameCounter;
-    quint8 gpdCommandId;
-} lastReceivedGP;
+    uint32_t gpdSrcId;
+    uint32_t frameCounter;
+    uint8_t gpdCommandId;
+};
+
+static unsigned lastReceivedIter;
+static GP_Frame lastReceivedGP[MAX_RECORDS];
 
 namespace deCONZ {
 
@@ -30,6 +36,30 @@ class GreenPowerControllerPrivate
 public:
     bool testZgpProxy = false;
 };
+
+static int isUnknownIndication(const deCONZ::GpDataIndication &ind)
+{
+    GP_Frame *fr;
+
+    for (unsigned i = 0; i < MAX_RECORDS; i++)
+    {
+        fr = &lastReceivedGP[i];
+        if (fr->gpdSrcId != ind.gpdSrcId()) continue;
+        if (fr->frameCounter != ind.frameCounter()) continue;
+        if (fr->gpdCommandId != ind.gpdCommandId()) continue;
+
+        return 0;
+    }
+
+    // fresh, keep record
+    fr = &lastReceivedGP[lastReceivedIter % MAX_RECORDS];
+    lastReceivedIter++;
+    fr->gpdSrcId = ind.gpdSrcId();
+    fr->frameCounter = ind.frameCounter();
+    fr->gpdCommandId = ind.gpdCommandId();
+
+    return 1;
+}
 
 GreenPowerController::GreenPowerController(QObject *parent) :
     QObject(parent),
@@ -64,11 +94,8 @@ void GreenPowerController::processIncomingData(const QByteArray &data)
     if (ind.readFromStream(stream))
     {
         // frames are received 3 times, forward only one
-        if (!(ind.frameCounter() == lastReceivedGP.frameCounter &&
-              ind.gpdSrcId()     == lastReceivedGP.gpdSrcId &&
-              ind.gpdCommandId() == lastReceivedGP.gpdCommandId))
+        if (isUnknownIndication(ind))
         {
-
             DBG_Printf(DBG_ZGP, "ZGP srcId: 0x%08X cmd: 0x%02X frameCounter: %u\n", ind.gpdSrcId(), ind.gpdCommandId(), ind.frameCounter());
 
             if (d_ptr->testZgpProxy)
@@ -77,9 +104,6 @@ void GreenPowerController::processIncomingData(const QByteArray &data)
             }
             else
             {
-                lastReceivedGP.gpdSrcId = ind.gpdSrcId();
-                lastReceivedGP.gpdCommandId = ind.gpdCommandId();
-                lastReceivedGP.frameCounter = ind.frameCounter();
                 emit gpDataIndication(ind);
             }
         }
@@ -96,14 +120,10 @@ void GreenPowerController::processIncomingProxyNotification(const QByteArray &da
     if (ind.readFromStreamGpNotification(stream))
     {
         // frames are received 3 times, forward only one
-        if (!(ind.frameCounter() == lastReceivedGP.frameCounter &&
-              ind.gpdSrcId()     == lastReceivedGP.gpdSrcId &&
-              ind.gpdCommandId() == lastReceivedGP.gpdCommandId) ||
-              (ind.gpdCommandId() == GppCommandIdCommissioningNotification)) // forward all GPP comissioning notifications
+        if (isUnknownIndication(ind) ||
+            (ind.gpdCommandId() == GppCommandIdCommissioningNotification)) // forward all GPP comissioning notifications
         {
-            lastReceivedGP.gpdSrcId = ind.gpdSrcId();
-            lastReceivedGP.gpdCommandId = ind.gpdCommandId();
-            lastReceivedGP.frameCounter = ind.frameCounter();
+
 
             DBG_Printf(DBG_ZGP, "ZGP via GPP proxy 0x%04X for GPD srcId: 0x%08X cmd: 0x%02X frameCounter: %u, GPD lqi: %s, rssi: %d\n", ind.gppShortAddress(), ind.gpdSrcId(), ind.gpdCommandId(), ind.frameCounter(), gpdLqi[ind.gppLqi()], ind.gppRssi());
             emit gpDataIndication(ind);
