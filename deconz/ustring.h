@@ -74,7 +74,7 @@ public:
     static UString number(unsigned long, int base=10);
     static UString number(long long, int base=10);
     static UString number(unsigned long long, int base=10);
-    static UString number(double, char f='f', int prec=6);
+    static UString number(double, char f='g', int prec=0);
 
     /*! Constructs a UString from an atom.
 

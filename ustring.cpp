@@ -441,30 +441,56 @@ UString UString::number(double num, char f, int prec)
     if (f != 'f' && f != 'g' && f != 'e' && f != 'E')
         f = 'f';
 
-    if (prec < 1 || prec > 9)
-        prec = 6;
-
-    if (f == 'f')
+#if 1
+    if (f == 'f' && prec > 0)
     {
+        if (prec < 1 || prec > 9)
+            prec = 6;
+
         U_sstream_init(&ss, str, sizeof(str));
         U_sstream_put_double(&ss, num, prec);
+
+        // TODO(mpi): compute prec + 1 and round last digit
+        // 1.55499 -> 1.5550
 
         if (ss.status == U_SSTREAM_OK)
         {
             return UString(ss.str);
         }
     }
+#endif
 
     fmt[0] = '%';
-    fmt[1] = '.';
-    fmt[2] = (char)prec + '0';
-    fmt[3] = f;
-    fmt[4] = '\0';
+    if (prec > 0)
+    {
+        if (prec > 9)
+            prec = 9;
+        fmt[1] = '.';
+        fmt[2] = (char)prec + '0';
+        fmt[3] = f;
+        fmt[4] = '\0';
+    }
+    else
+    {
+        fmt[1] = f;
+        fmt[2] = '\0';
+    }
 
     n = snprintf(str, sizeof(str) - 1, fmt, num);
     n = (n < 0 || n > 63) ? 0 : n;
     str[n] = '\0';
-    // TODO(mpi): remove trailing zeros and dot
+
+    if (prec == 0)
+    {
+        for (;n > 0 && (str[n - 1] == '0' || str[n - 1] == '.'); n--)
+        {
+            str[n - 1] = '\0';
+        }
+
+        if (str[0] == '\0') // 0.0000 prevent empty string for zero
+            str[0] = '0';
+
+    }
 
     return UString(&str[0]);
 }
