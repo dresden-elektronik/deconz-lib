@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11)
 
 project(deCONZLib VERSION 1.2.0 LANGUAGES C;CXX)
 
+option(BUILD_TESTS "Build tests" OFF)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -105,10 +107,10 @@ target_include_directories(${PROJECT_NAME}
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-
-enable_testing()
-
-add_subdirectory(tests)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 #include(GNUInstallDirs)
 
