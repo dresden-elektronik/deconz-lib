@@ -18,6 +18,7 @@ set(PUB_INCLUDE_FILES
     deconz/atom_table.h
     deconz/binding_table.h
     deconz/buffer_helper.h
+    deconz/buffer_pool.h
     deconz/dbg_trace.h
     deconz/device_enumerator.h
     deconz/file.h
@@ -53,6 +54,7 @@ add_library(${PROJECT_NAME} SHARED
     atom_table.c
     binding_table.cpp
     buffer_helper.c
+    buffer_pool.c
     dbg_trace.cpp
     device_enumerator.cpp
     file_posix.c
