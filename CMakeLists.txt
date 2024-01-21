@@ -20,6 +20,7 @@ set(PUB_INCLUDE_FILES
     deconz/buffer_helper.h
     deconz/dbg_trace.h
     deconz/device_enumerator.h
+    deconz/file.h
     deconz/green_power.h
     deconz/green_power_controller.h
     deconz/nanbox.h
@@ -54,6 +55,7 @@ add_library(${PROJECT_NAME} SHARED
     buffer_helper.c
     dbg_trace.cpp
     device_enumerator.cpp
+    file_posix.c
     green_power.cpp
     green_power_controller.cpp
     nanbox.c
