@@ -195,7 +195,7 @@ void DBG_Flush()
 #endif
 #if defined(__linux__) || defined(__APPLE__)
     fputs(_dbg->buf.c_str(), logFP);
-#if !defined(__arm__) // don't wait blocking
+#if !defined(__arm__) && !defined(__ARM_ARCH)// don't wait blocking
     fflush(logFP);
 #endif
 #endif // linux, apple
