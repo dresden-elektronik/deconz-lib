@@ -305,7 +305,7 @@ unsigned char *DBG_HexToAscii(const void *hex, unsigned length, void *ascii)
     unsigned char *h;
     unsigned char *a;
 
-    if (!hex || length < 3 || !ascii)
+    if (!hex || length == 0 || !ascii)
         return 0;
 
     h = (unsigned char*)hex;
