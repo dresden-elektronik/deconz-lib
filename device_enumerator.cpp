@@ -19,6 +19,10 @@
   #define PL_LINUX 1
 #endif
 
+#ifdef __APPLE__
+  #define PL_MACOS 1
+#endif
+
 #ifdef USE_QEXT_SERIAL
   #include <QSerialPortInfo>
 #endif // USE_QEXT_SERIAL
@@ -585,6 +589,14 @@ bool DeviceEnumerator::listSerialPorts()
                        qPrintable(i->systemLocation()), qPrintable(i->description()),
                        qPrintable(i->manufacturer()), i->vendorIdentifier(), i->productIdentifier());
         }
+
+#ifdef PL_MACOS
+        // there are also entries starting with tty. which don't work
+        if (!i->systemLocation().contains(QLatin1String("cu.")))
+        {
+            continue;
+        }
+#endif
 
         if ((i->vendorIdentifier() == 0x1cf1) ||  // dresden elektronik
             (i->vendorIdentifier() == 0x0403) ||  // FTDI
