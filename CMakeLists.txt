@@ -30,6 +30,7 @@ set(PUB_INCLUDE_FILES
     deconz/timeref.h
     deconz/types.h
     deconz/util.h
+    deconz/u_arena.h
     deconz/u_assert.h
     deconz/u_bstream.h
     deconz/u_rand32.h
@@ -64,6 +65,7 @@ add_library(${PROJECT_NAME} SHARED
     green_power_controller.cpp
     nanbox.c
     util.cpp
+    u_arena.c
     u_bstream.c
     u_memory.c
     u_rand32.c
