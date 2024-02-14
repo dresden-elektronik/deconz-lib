@@ -34,6 +34,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_bstream.h
     deconz/u_rand32.h
     deconz/u_library.h
+    deconz/u_memory.h
     deconz/u_sstream.h
     deconz/u_threads.h
     deconz/ustring.h
@@ -64,6 +65,7 @@ add_library(${PROJECT_NAME} SHARED
     nanbox.c
     util.cpp
     u_bstream.c
+    u_memory.c
     u_rand32.c
     u_sstream.c
     ustring.cpp
