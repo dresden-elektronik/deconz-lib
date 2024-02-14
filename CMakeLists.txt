@@ -30,6 +30,7 @@ set(PUB_INCLUDE_FILES
     deconz/timeref.h
     deconz/types.h
     deconz/util.h
+    deconz/u_assert.h
     deconz/u_bstream.h
     deconz/u_rand32.h
     deconz/u_library.h
@@ -88,6 +89,8 @@ endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_NAME deCONZ)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC "$<$<CONFIG:Debug>:DECONZ_DEBUG_BUILD>")
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
