@@ -96,7 +96,14 @@ void GreenPowerController::processIncomingData(const QByteArray &data)
         // frames are received 3 times, forward only one
         if (isUnknownIndication(ind))
         {
-            DBG_Printf(DBG_ZGP, "ZGP srcId: 0x%08X cmd: 0x%02X frameCounter: %u\n", ind.gpdSrcId(), ind.gpdCommandId(), ind.frameCounter());
+            if (DBG_IsEnabled(DBG_ZGP))
+            {
+                char hex[256];
+                if (data.size() < ((sizeof(hex) / 2) - 1) && DBG_HexToAscii(data.data(), data.length(), hex))
+                {
+                    DBG_Printf(DBG_ZGP, "ZGP srcId: 0x%08X cmd: 0x%02X frameCounter: %u (0x%s)\n", ind.gpdSrcId(), ind.gpdCommandId(), ind.frameCounter(), hex);
+                }
+            }
 
             if (d_ptr->testZgpProxy)
             {
