@@ -60,12 +60,13 @@ void *U_AllocArena(U_Arena *arena, unsigned long size, unsigned alignment)
 
     p = arena->buf;
     p += arena->size;
-    p = U_memalign(p, alignment);
+    p = U_memalign(p, sizeof(unsigned long));
 
     // embed size header before memory
     size_hdr = (unsigned long*)p;
     *size_hdr = size;
     p += sizeof(*size_hdr);
+    p = U_memalign(p, alignment);
 
     end = arena->buf;
     end += (arena->_total_size & U_ARENA_SIZE_MASK);

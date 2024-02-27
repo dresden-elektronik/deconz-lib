@@ -21,13 +21,14 @@ void *U_memalign(void *p, unsigned align)
     uintptr_t algn;
     void *p1;
 
-    U_ASSERT(align == 1 || align == 8 || align == 16 || align == 32 || align == 64);
+    U_ASSERT(align == 1 || align == 4 || align == 8 || align == 16 || align == 32 || align == 64);
 
     num = (uintptr_t)p;
     algn = align;
     p1 = (void*)((num + (algn - 1)) & ~(algn - 1));
 
     U_ASSERT(p <= p1);
+    U_ASSERT((((uintptr_t)p1) & (align - 1)) == 0);
     return p1;
 }
 
