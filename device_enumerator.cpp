@@ -23,6 +23,10 @@
   #define PL_MACOS 1
 #endif
 
+#ifdef __WIN32__
+  #define PL_WINDOWS 1
+#endif
+
 #ifdef USE_QEXT_SERIAL
   #include <QSerialPortInfo>
 #endif // USE_QEXT_SERIAL
@@ -590,6 +594,16 @@ bool DeviceEnumerator::listSerialPorts()
                        qPrintable(i->manufacturer()), i->vendorIdentifier(), i->productIdentifier());
         }
 
+#ifdef PL_WINDOWS
+        if (!comPort.isEmpty())
+        {
+            if (!i->systemLocation().contains(comPort))
+            {
+                continue;
+            }
+        }
+#endif
+
 #ifdef PL_MACOS
         // there are also entries starting with tty. which don't work
         if (!i->systemLocation().contains(QLatin1String("cu.")))
@@ -637,7 +651,7 @@ bool DeviceEnumerator::listSerialPorts()
                     dev.baudrate = 115200;
                     found = true;
                 }
-#ifdef _WIN32
+#ifdef PL_WINDOWS
                 // TODO use code from GCFFlasher4, this is here is only a workaround
                 if (i->description() == QLatin1String("USB Serial Port"))
                 {
@@ -814,6 +828,17 @@ bool DeviceEnumerator::listSerialPorts()
         DeviceEntry dev;
         dev.path = comPort;
         dev.friendlyName = QLatin1String("RaspBee"); // could be wrong
+        d->devs.push_back(dev);
+    }
+#endif
+
+#ifdef PL_WINDOWS
+    if (d->devs.empty() && !comPort.isEmpty())
+    {
+        DeviceEntry dev;
+        dev.path = comPort;
+        dev.friendlyName = QLatin1String("ConBee"); // could be wrong
+        dev.baudrate = deCONZ::appArgumentNumeric("--baudrate", 0);
         d->devs.push_back(dev);
     }
 #endif
