@@ -11,6 +11,13 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 COMPONENTS Core Gui SerialPort REQUIRED)
 
+if (UNIX)
+    include(FindPkgConfig)
+    pkg_check_modules (OPENSSL openssl)
+else()
+    find_package(OpenSSL REQUIRED)
+endif()
+
 set(PUB_INCLUDE_FILES
     deconz/aps.h
     deconz/aps_controller.h
@@ -36,6 +43,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_rand32.h
     deconz/u_library.h
     deconz/u_memory.h
+    deconz/u_sha256.h
     deconz/u_sstream.h
     deconz/u_threads.h
     deconz/ustring.h
@@ -69,6 +77,7 @@ add_library(${PROJECT_NAME} SHARED
     u_bstream.c
     u_memory.c
     u_rand32.c
+    u_sha256.c
     u_sstream.c
     ustring.cpp
     qhttprequest_compat.cpp
@@ -88,6 +97,15 @@ if (WIN32)
 else()
     target_sources(${PROJECT_NAME} PRIVATE u_threads_pthreads.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
+endif()
+
+if (OPENSSL_FOUND)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE HAS_OPENSSL=1)
+    if (APPLE)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIRS})
+    else()
+        target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+    endif()
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_NAME deCONZ)
