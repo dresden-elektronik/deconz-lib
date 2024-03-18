@@ -50,6 +50,7 @@ typedef struct FS_DirEntry
 typedef struct FS_Dir
 {
     void *p;
+    int state;
     FS_DirEntry entry;
 } FS_Dir;
 
