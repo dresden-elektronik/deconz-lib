@@ -29,6 +29,29 @@ typedef struct FS_File
     int flags;
 } FS_File;
 
+enum FS_EntryType
+{
+    FS_TYPE_UNKNOWN,
+    FS_TYPE_BLOCK,
+    FS_TYPE_CHARACTER_DEVICE,
+    FS_TYPE_DIRECTORY,
+    FS_TYPE_FIFO,
+    FS_TYPE_LINK,
+    FS_TYPE_FILE,
+    FS_TYPE_SOCKET
+};
+
+typedef struct FS_DirEntry
+{
+    enum FS_EntryType type;
+    char name[256];
+} FS_DirEntry;
+
+typedef struct FS_Dir
+{
+    void *p;
+    FS_DirEntry entry;
+} FS_Dir;
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +65,10 @@ DECONZ_DLLSPEC long FS_WriteFile(FS_File *fp, const void *buf, long size);
 DECONZ_DLLSPEC int FS_SeekFile(FS_File *fp, long offset, int whence);
 DECONZ_DLLSPEC int FS_TruncateFile(FS_File *fp, long size);
 DECONZ_DLLSPEC int FS_DeleteFile(const char *path);
+
+DECONZ_DLLSPEC int FS_OpenDir(FS_Dir *dir, const char *path);
+DECONZ_DLLSPEC int FS_ReadDir(FS_Dir *dir);
+DECONZ_DLLSPEC int FS_CloseDir(FS_Dir *dir);
 
 #ifdef __cplusplus
 }

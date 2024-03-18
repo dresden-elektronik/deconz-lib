@@ -68,7 +68,6 @@ add_library(${PROJECT_NAME} SHARED
     buffer_pool.c
     dbg_trace.cpp
     device_enumerator.cpp
-    file_posix.c
     green_power.cpp
     green_power_controller.cpp
     nanbox.c
@@ -94,9 +93,11 @@ add_library(${PROJECT_NAME} SHARED
 if (WIN32)
     target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE u_threads_win32.c)
+    target_sources(${PROJECT_NAME} PRIVATE file_win32.c)
 else()
     target_sources(${PROJECT_NAME} PRIVATE u_threads_pthreads.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
+    target_sources(${PROJECT_NAME} PRIVATE file_posix.c)
 endif()
 
 if (OPENSSL_FOUND)

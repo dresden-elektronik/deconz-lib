@@ -1,5 +1,7 @@
 #define _DEFAULT_SOURCE
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <unistd.h>
 #undef _DEFAULT_SOURCE
 
@@ -155,5 +157,61 @@ int FS_DeleteFile(const char *path)
     if (unlink(path) == 0)
         return 1;
 
+    return 0;
+}
+
+int FS_OpenDir(FS_Dir *dir, const char *path)
+{
+    dir->p = opendir(path);
+    dir->entry.type = FS_TYPE_UNKNOWN;
+    dir->entry.name[0] = '\0';
+
+    if (dir->p)
+        return 1;
+
+    return 0;
+}
+
+int FS_ReadDir(FS_Dir *dir)
+{
+    int i;
+    struct dirent *entry;
+
+    dir->entry.type = FS_TYPE_UNKNOWN;
+    dir->entry.name[0] = '\0';
+    entry = readdir(dir->p);
+    if (entry)
+    {
+        for (i = 0; entry->d_name[i]; i++)
+            dir->entry.name[i] = entry->d_name[i];
+
+        dir->entry.name[i] = '\0';
+
+        switch (entry->d_type)
+        {
+            case DT_BLK:  dir->entry.type = FS_TYPE_BLOCK; break;
+            case DT_CHR:  dir->entry.type = FS_TYPE_CHARACTER_DEVICE; break;
+            case DT_DIR:  dir->entry.type = FS_TYPE_DIRECTORY; break;
+            case DT_FIFO: dir->entry.type = FS_TYPE_FIFO; break;
+            case DT_LNK:  dir->entry.type = FS_TYPE_LINK; break;
+            case DT_REG:  dir->entry.type = FS_TYPE_FILE; break;
+            case DT_SOCK: dir->entry.type = FS_TYPE_SOCKET; break;
+            default:      dir->entry.type = FS_TYPE_UNKNOWN; break;
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+int FS_CloseDir(FS_Dir *dir)
+{
+    if (dir->p)
+    {
+        closedir(dir->p);
+        dir->p = 0;
+        return 1;
+    }
     return 0;
 }
