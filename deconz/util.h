@@ -48,7 +48,9 @@ enum StorageLocation
     NodeCacheLocation,
     RuntimeLocation,
     DdfLocation,
-    DdfUserLocation
+    DdfUserLocation,
+    DdfBundleLocation,
+    DdfBundleUserLocation
 };
 
 int DECONZ_DLLSPEC appArgumentNumeric(const QString &arg, int defaultValue);

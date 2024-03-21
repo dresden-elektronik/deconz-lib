@@ -21,7 +21,7 @@
 #include "deconz/dbg_trace.h"
 #include "deconz/util.h"
 
-#ifdef _WIN32
+#ifdef PL_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <limits.h>
@@ -39,7 +39,7 @@ typedef unsigned __int32  uint32_t;
 
 static QString resolvePath(const QString &origPath)
 {
-#ifdef Q_OS_UNIX
+#ifdef PL_UNIX
     QString path = origPath;
     if (!path.isEmpty())
     {
@@ -68,7 +68,7 @@ class CPUID {
 
 public:
   explicit CPUID(unsigned i) {
-#ifdef _WIN32
+#ifdef PL_WINDOWS
     __cpuid((int *)regs, (int)i);
 
 #elif defined(Q_PROCESSOR_X86)
@@ -77,7 +77,7 @@ public:
        : "a" (i), "c" (0));
     // ECX is set to zero for CPUID function 4
 #else
-      Q_UNUSED(i)
+      (void)i;
 #endif
   }
 
@@ -215,12 +215,12 @@ QString getStorageLocation(StorageLocation location)
 
         bool found = false;
         static const char *paths[] = {
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
             "/.local/share/data/dresden-elektronik/deCONZ",
             "/.local/share/dresden-elektronik/deCONZ",
             "/.local/share/deCONZ",
 #endif
-#ifdef Q_OS_WIN
+#ifdef PL_WINDOWS
             "/AppData/Local/dresden-elektronik/deCONZ",
 #endif
             0
@@ -257,13 +257,13 @@ QString getStorageLocation(StorageLocation location)
 
     case DdfLocation:
     {
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
         path = deCONZ::appArgumentString(QLatin1String("--ddf-root"),
                                          QLatin1String("/usr/share/deCONZ/devices"));
-#elif defined (Q_OS_WIN)
+#elif defined (PL_WINDOWS)
         path = deCONZ::appArgumentString(QLatin1String("--ddf-root"),
                                          deCONZ::getStorageLocation(deCONZ::ApplicationsLocation) + QLatin1String("/devices"));
-#elif defined (__APPLE__)
+#elif defined (PL_MACOS)
         path = deCONZ::appArgumentString(QLatin1String("--ddf-root"),
                                          deCONZ::getStorageLocation(deCONZ::ApplicationsLocation) + QLatin1String("/Resources/devices"));
 #else
@@ -273,9 +273,29 @@ QString getStorageLocation(StorageLocation location)
     }
         break;
 
+    case DdfBundleLocation:
+    {
+#ifdef PL_LINUX
+        path = QLatin1String("/usr/share/deCONZ/bundles");
+#elif defined (PL_WINDOWS)
+        path = deCONZ::getStorageLocation(deCONZ::ApplicationsLocation) + QLatin1String("/bundles");
+#elif defined (PL_MACOS)
+        path = deCONZ::getStorageLocation(deCONZ::ApplicationsLocation) + QLatin1String("/Resources/bundles");
+#else
+        path = deCONZ::getStorageLocation(deCONZ::ApplicationsDataLocation) + QLatin1String("/bundles");
+#endif
+    }
+        break;
+
     case DdfUserLocation:
     {
         path = deCONZ::getStorageLocation(ApplicationsDataLocation) + QLatin1String("/devices");
+    }
+        break;
+
+    case DdfBundleUserLocation:
+    {
+        path = deCONZ::getStorageLocation(ApplicationsDataLocation) + QLatin1String("/bundles");
     }
         break;
 
