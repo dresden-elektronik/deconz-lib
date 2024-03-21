@@ -90,6 +90,18 @@ add_library(${PROJECT_NAME} SHARED
     touchlink_controller.cpp
 )
 
+if (APPLE)
+    target_include_directories(${PROJECT_NAME} PRIVATE PL_MACOS PL_UNIX)
+endif()
+
+if (WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE PL_WINDOWS)
+endif()
+
+if (LINUX)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE PL_LINUX PL_UNIX)
+endif()
+
 if (WIN32)
     target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE u_threads_win32.c)

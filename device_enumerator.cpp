@@ -15,18 +15,6 @@
 #include <QTimer>
 #include <vector>
 
-#ifdef __linux__
-  #define PL_LINUX 1
-#endif
-
-#ifdef __APPLE__
-  #define PL_MACOS 1
-#endif
-
-#ifdef __WIN32__
-  #define PL_WINDOWS 1
-#endif
-
 #ifdef USE_QEXT_SERIAL
   #include <QSerialPortInfo>
 #endif // USE_QEXT_SERIAL
