@@ -11,8 +11,6 @@
 #include <QtGlobal>
 #include <QCoreApplication>
 #include <QDir>
-#include <QList>
-#include <QVariant>
 #include <QDesktopServices>
 #include <QProcessEnvironment>
 #include <limits.h>

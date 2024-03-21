@@ -7,7 +7,7 @@
 #define DECONZ_UTIL_H
 
 /*
- * Copyright (c) 2012-2023 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2012-2024 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -26,7 +26,6 @@
 */
 
 #include <QString>
-#include <QMetaType> // QVariantList, QVariantMap
 #include "deconz/declspec.h"
 
 /*! \brief Various data types as defined in ZigBee ZCL specification.
