@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2012-2024 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -181,115 +181,6 @@ QString DECONZ_DLLSPEC appArgumentString(const QString &arg, const QString &defa
     }
 
     return defaultValue;
-}
-
-QString jsonStringFromMap(const QVariantMap &map)
-{
-    QString str;
-    QVariantMap::const_iterator i = map.constBegin();
-    QVariantMap::const_iterator end = map.constEnd();
-
-    str.append("{");
-
-    int pos = 1;
-    for (; i != end; ++i)
-    {
-        bool appendDelim = true;
-
-        if (i.value().type() == QVariant::String)
-        {
-            str.append(QString("\"%1\":\"%2\"")
-                       .arg(i.key())
-                       .arg(i.value().toString()));
-
-        }
-        else if (i.value().type() == QVariant::Bool)
-        {
-            str.append(QString("\"%1\":%2")
-                       .arg(i.key())
-                       .arg(i.value().toBool() == true ? "true" : "false"));
-        }
-        else if (i.value().type() == QVariant::Double)
-        {
-            str.append(QString("\"%1\":%2")
-                       .arg(i.key())
-                       .arg(i.value().toDouble()));
-        }
-        else if (i.value().type() == QVariant::Map)
-        {
-            str.append(QString("\"%1\":").arg(i.key()));
-            //  recursion
-            str.append(jsonStringFromMap(i.value().toMap()));
-        }
-        else if (i.value().type() == QVariant::List)
-        {
-            str.append(QString("\"%1\":").arg(i.key()));
-            //  recursion
-            str.append(jsonStringFromList(i.value().toList()));
-        }
-        else
-        {
-            appendDelim = false;
-            DBG_Printf(DBG_INFO, "unknown json map data type %d\n", i.value().type());
-        }
-
-        if (appendDelim && (pos < map.size()))
-        {
-            str.append(",");
-        }
-
-        pos++;
-    }
-    str.append("}");
-
-    return str;
-}
-
-QString jsonStringFromList(const QVariantList &ls)
-{
-    QString str;
-    QVariantList::const_iterator i = ls.constBegin();
-    QVariantList::const_iterator end = ls.constEnd();
-
-    str.append("[");
-
-    int pos = 1;
-    for (; i != end; ++i)
-    {
-        bool appendDelim = true;
-
-        if (i->type() == QVariant::Map)
-        {
-            //  recursion
-            str.append(jsonStringFromMap(i->toMap()));
-        }
-        else if (i->type() == QVariant::String)
-        {
-            str.append("\"");
-            str.append(i->toString());
-            str.append("\"");
-        }
-        else if (i->type() == QVariant::Double)
-        {
-            str.append(QString("%1")
-                       .arg(i->toDouble()));
-        }
-        else
-        {
-            DBG_Printf(DBG_INFO, "unknown json map data type %d\n", i->type());
-            appendDelim = false;
-        }
-
-        if (appendDelim && (pos < ls.size()))
-        {
-            str.append(",");
-        }
-
-        pos++;
-    }
-    str.append("]");
-
-    return str;
 }
 
 QString getStorageLocation(StorageLocation location)

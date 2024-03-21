@@ -53,8 +53,6 @@ enum StorageLocation
 
 int DECONZ_DLLSPEC appArgumentNumeric(const QString &arg, int defaultValue);
 QString DECONZ_DLLSPEC appArgumentString(const QString &arg, const QString &defaultValue);
-QString DECONZ_DLLSPEC jsonStringFromMap(const QVariantMap &map);
-QString DECONZ_DLLSPEC jsonStringFromList(const QVariantList &ls);
 QString DECONZ_DLLSPEC getStorageLocation(StorageLocation location);
 bool DECONZ_DLLSPEC isVirtualMachine();
 } // namespace deCONZ
