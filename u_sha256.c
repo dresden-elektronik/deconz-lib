@@ -12,8 +12,10 @@ static int init_sha256_lib(void)
 
     if (!libSHA256)
     {
-#ifdef __APPLE__
+#ifdef PL_MACOS
         libssl = U_library_open("../Frameworks/libssl.3.dylib");
+#elif defined(PL_WINDOWS)
+        libssl = U_library_open("libcrypto-1_1.dll");
 #else
         libssl = U_library_open("libssl");
 #endif
