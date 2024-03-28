@@ -42,6 +42,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_bstream.h
     deconz/u_rand32.h
     deconz/u_library.h
+    deconz/u_library_ex.h
     deconz/u_memory.h
     deconz/u_sha256.h
     deconz/u_sstream.h
@@ -74,6 +75,7 @@ add_library(${PROJECT_NAME} SHARED
     util.cpp
     u_arena.c
     u_bstream.c
+    u_library_ex.c
     u_memory.c
     u_rand32.c
     u_sha256.c
