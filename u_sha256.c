@@ -1,5 +1,5 @@
 #include "deconz/u_sha256.h"
-#include "deconz/u_library.h"
+#include "deconz/u_library_ex.h"
 
 #ifdef HAS_OPENSSL
 #include <openssl/sha.h>
@@ -8,19 +8,13 @@ static unsigned char (*libSHA256)(const unsigned char *d, size_t n, unsigned cha
 
 static int init_sha256_lib(void)
 {
-    void *libssl;
+    void *libcrypto;
 
     if (!libSHA256)
     {
-#ifdef PL_MACOS
-        libssl = U_library_open("../Frameworks/libssl.3.dylib");
-#elif defined(PL_WINDOWS)
-        libssl = U_library_open("libcrypto-1_1.dll");
-#else
-        libssl = U_library_open("libssl");
-#endif
-        if (libssl)
-            libSHA256 = (unsigned char (*)(const unsigned char*, size_t, unsigned char*))U_library_symbol(libssl, "SHA256");
+        libcrypto = U_library_open_ex("libcrypto");
+        if (libcrypto)
+            libSHA256 = (unsigned char (*)(const unsigned char*, size_t, unsigned char*))U_library_symbol(libcrypto, "SHA256");
     }
 
     return libSHA256 ? 1 : 0;
