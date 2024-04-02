@@ -40,6 +40,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_arena.h
     deconz/u_assert.h
     deconz/u_bstream.h
+    deconz/u_random.h
     deconz/u_rand32.h
     deconz/u_library.h
     deconz/u_library_ex.h
@@ -78,6 +79,7 @@ add_library(${PROJECT_NAME} SHARED
     u_bstream.c
     u_library_ex.c
     u_memory.c
+    u_random.c
     u_rand32.c
     u_sha1.c
     u_sha256.c
@@ -93,6 +95,8 @@ add_library(${PROJECT_NAME} SHARED
     touchlink.cpp
     touchlink_controller.cpp
 )
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE U_LIBAPI_PRIVATE)
 
 if (APPLE)
     target_include_directories(${PROJECT_NAME} PRIVATE PL_MACOS PL_UNIX)
@@ -113,6 +117,7 @@ if (WIN32)
 else()
     target_sources(${PROJECT_NAME} PRIVATE u_threads_pthreads.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
+    target_sources(${PROJECT_NAME} PRIVATE u_random_getentropy.c)
     target_sources(${PROJECT_NAME} PRIVATE file_posix.c)
 endif()
 
@@ -123,6 +128,7 @@ if (OPENSSL_FOUND)
     else()
         target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
     endif()
+    target_sources(${PROJECT_NAME} PRIVATE u_random_openssl.c)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_NAME deCONZ)

@@ -1,8 +1,8 @@
-#ifndef U_RAND32_H
-#define U_RAND32_H
+#ifndef U_RANDOM_H
+#define U_RANDOM_H
 
 /*
- * Copyright (c) 2012-2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2024 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -30,16 +30,15 @@
 extern "C" {
 #endif
 
-/*! Sets pseudo random number generator seed value. */
-U_LIBAPI void U_rand32_seed(unsigned seed);
+/*! Writes high quality random data into \p buf */
+U_LIBAPI int U_RandomBytes(unsigned char *buf, unsigned bufsize);
 
-
-/*! Returns 32-bit random number.
-    This must NOT be used for security related random data use u_random.h instead. */
-U_LIBAPI unsigned U_rand32(void);
+#ifdef U_LIBAPI_PRIVATE
+typedef int (*U_rand_bytes_fp)(unsigned char*, unsigned);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* U_RAND32_H */
+#endif /* U_RANDOM_H */
