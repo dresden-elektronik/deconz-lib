@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 project(deCONZLib VERSION 1.2.0 LANGUAGES C;CXX)
 
 option(BUILD_TESTS "Build tests" OFF)
+option(USE_MICRO_ECC "Use micro-ecc library" ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
@@ -17,6 +18,33 @@ if (UNIX)
 else()
     find_package(OpenSSL REQUIRED)
 endif()
+
+include(FetchContent)
+
+# --- fetch micro-ecc from GitHub --------------------------------
+# Technically OpenSSL can do everything micro-ecc does but we already
+# have an tested implementation, so use it for now.
+
+if (USE_MICRO_ECC)
+    FetchContent_Declare(
+      libuecc
+      GIT_REPOSITORY https://github.com/kmackay/micro-ecc.git
+      GIT_TAG        v1.1
+    )
+
+    # FetchContent_MakeAvailable(uecc)
+    # FetchContent_MakeAvailable requires CMake 3.14, but Debian Buster has only 3.13
+    FetchContent_GetProperties(libuecc)
+    if (NOT libuecc_POPULATED)
+        FetchContent_Populate(libuecc)
+    endif()
+
+    add_library(uECC STATIC ${libuecc_SOURCE_DIR}/uECC.c)
+    target_include_directories(uECC PUBLIC ${libuecc_SOURCE_DIR})
+
+endif()
+
+# -------------------------------------------------------------------------
 
 set(PUB_INCLUDE_FILES
     deconz/aps.h
@@ -40,6 +68,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_arena.h
     deconz/u_assert.h
     deconz/u_bstream.h
+    deconz/u_ecc.h
     deconz/u_random.h
     deconz/u_rand32.h
     deconz/u_library.h
@@ -114,11 +143,17 @@ if (WIN32)
     target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE u_threads_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE file_win32.c)
+    target_link_libraries(${PROJECT_NAME} PRIVATE bcrypt)
 else()
     target_sources(${PROJECT_NAME} PRIVATE u_threads_pthreads.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
     target_sources(${PROJECT_NAME} PRIVATE u_random_getentropy.c)
     target_sources(${PROJECT_NAME} PRIVATE file_posix.c)
+endif()
+
+if (USE_MICRO_ECC)
+    target_sources(${PROJECT_NAME} PRIVATE u_micro_ecc.c)
+    target_link_libraries(${PROJECT_NAME} PRIVATE uECC)
 endif()
 
 if (OPENSSL_FOUND)
