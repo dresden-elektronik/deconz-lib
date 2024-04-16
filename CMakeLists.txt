@@ -69,6 +69,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_assert.h
     deconz/u_bstream.h
     deconz/u_ecc.h
+    deconz/u_hmac_sha256.h
     deconz/u_random.h
     deconz/u_rand32.h
     deconz/u_library.h
@@ -107,6 +108,7 @@ add_library(${PROJECT_NAME} SHARED
     util.cpp
     u_arena.c
     u_bstream.c
+    u_hmac_sha256.c
     u_library_ex.c
     u_memory.c
     u_random.c
