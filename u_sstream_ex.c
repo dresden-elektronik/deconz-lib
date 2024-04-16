@@ -1,4 +1,4 @@
-#include "u_sstream.c"
+#include "deconz/u_sstream_ex.h"
 
 static const char _hex_table_lower[16] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
@@ -35,7 +35,7 @@ void U_sstream_put_mac_address(U_SStream *ss, unsigned long long mac)
     ss->str[ss->pos] = '\0';
 }
 
-unsigned long U_sstream_get_hex_byte(U_SStream *ss)
+unsigned char U_sstream_get_hex_byte(U_SStream *ss)
 {
     unsigned i;
     unsigned char ch;

@@ -115,6 +115,7 @@ add_library(${PROJECT_NAME} SHARED
     u_rand32.c
     u_sha1.c
     u_sha256.c
+    u_sstream.c
     u_sstream_ex.c
     ustring.cpp
     qhttprequest_compat.cpp
