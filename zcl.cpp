@@ -1529,6 +1529,19 @@ void ZclAttribute::setValue(const QVariant &value)
             setValue(val);
         }
     }
+    else if (dataType() >= Zcl8BitData && (dataType() <= Zcl64BitData))
+    {
+        const quint64 val = value.toULongLong(&ok);
+
+        if (!ok)
+        {
+            DBG_Printf(DBG_ZCLDB, "ZclAttribute 0x%04X cant't set value\n", id());
+        }
+        else
+        {
+            setValue(val);
+        }
+    }
     else if (dataType() == ZclBoolean)
     {
         d->m_numericValue.u64 = 0;
