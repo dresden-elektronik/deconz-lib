@@ -80,6 +80,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_sstream.h
     deconz/u_sstream_ex.h
     deconz/u_threads.h
+    deconz/u_time.h
     deconz/ustring.h
     deconz/zcl.h
     deconz/zdp_descriptors.h
@@ -117,6 +118,7 @@ add_library(${PROJECT_NAME} SHARED
     u_sha256.c
     u_sstream.c
     u_sstream_ex.c
+    u_time.c
     ustring.cpp
     qhttprequest_compat.cpp
     zcl.cpp
