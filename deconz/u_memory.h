@@ -38,6 +38,7 @@ U_LIBAPI void *U_memalign(void *p, unsigned align);
 U_LIBAPI void *U_memset(void *p, int c, unsigned long n);
 U_LIBAPI int U_memcmp(const void *a, const void *b, unsigned long n);
 U_LIBAPI void *U_memcpy(void *dst, const void *src, unsigned long n);
+U_LIBAPI unsigned U_strlen(const char *str);
 
 U_LIBAPI void *U_Alloc(unsigned long size);
 U_LIBAPI int U_Free(void *p);

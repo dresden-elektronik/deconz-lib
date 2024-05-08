@@ -42,6 +42,11 @@ int U_memcmp(const void *a, const void *b, unsigned long n)
     return memcmp(a, b, n);
 }
 
+unsigned U_strlen(const char *str)
+{
+    return strlen(str);
+}
+
 void *U_memcpy(void *dst, const void *src, unsigned long n)
 {
     return memcpy(dst, src, n);
