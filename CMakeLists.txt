@@ -134,7 +134,7 @@ add_library(${PROJECT_NAME} SHARED
 target_compile_definitions(${PROJECT_NAME} PRIVATE U_LIBAPI_PRIVATE)
 
 if (APPLE)
-    target_include_directories(${PROJECT_NAME} PRIVATE PL_MACOS PL_UNIX)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE PL_MACOS PL_UNIX)
 endif()
 
 if (WIN32)
