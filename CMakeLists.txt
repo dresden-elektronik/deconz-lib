@@ -141,7 +141,7 @@ if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE PL_WINDOWS)
 endif()
 
-if (LINUX)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(${PROJECT_NAME} PRIVATE PL_LINUX PL_UNIX)
 endif()
 
