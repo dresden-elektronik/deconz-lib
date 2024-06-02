@@ -31,7 +31,7 @@ void *U_library_open_ex(const char *filename)
 #ifdef PL_MACOS
         filename = "../Frameworks/libssl.3.dylib";
 #elif defined PL_WINDOWS
-        filename = "libssl-1_1.dll";
+        filename = "libssl-3.dll";
 #endif
     }
     else if (U_sstream_starts_with(&ss, "libcrypto"))
@@ -39,7 +39,7 @@ void *U_library_open_ex(const char *filename)
 #ifdef PL_MACOS
         filename = "../Frameworks/libcrypto.3.dylib";
 #elif defined PL_WINDOWS
-        filename = "libcrypto-1_1.dll";
+        filename = "libcrypto-3.dll";
 #endif
     }
 
