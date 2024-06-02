@@ -44,7 +44,7 @@ void *U_library_open(const char *filename)
 
         if (dot_pos == 0) /* add platform extension */
         {
-#ifdef __APPLE__
+#ifdef PL_MACOS
             path[len++] = '.';
             path[len++] = 'd';
             path[len++] = 'y';
@@ -52,11 +52,15 @@ void *U_library_open(const char *filename)
             path[len++] = 'i';
             path[len++] = 'b';
             path[len] = '\0';
-#else
+#endif
+
+#ifndef PL_MACOS
+#ifdef PL_UNIX
             path[len++] = '.';
             path[len++] = 's';
             path[len++] = 'o';
             path[len] = '\0';
+#endif
 #endif
         }
 

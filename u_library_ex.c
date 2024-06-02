@@ -15,6 +15,7 @@ void *U_library_open_ex(const char *filename)
 {
     U_SStream ss;
     unsigned len;
+    void *lib;
 
     if (!filename || filename[0] == '\0')
     {
@@ -33,6 +34,19 @@ void *U_library_open_ex(const char *filename)
 #elif defined PL_WINDOWS
         filename = "libssl-3.dll";
 #endif
+
+#ifndef PL_MACOS
+#ifdef PL_UNIX
+    lib = U_library_open("libssl.so");
+    if (!lib)
+        lib = U_library_open("libssl.so.3");
+    if (!lib)
+        lib = U_library_open("libssl.so.1.1");
+
+    return lib;
+#endif
+#endif
+
     }
     else if (U_sstream_starts_with(&ss, "libcrypto"))
     {
@@ -40,6 +54,18 @@ void *U_library_open_ex(const char *filename)
         filename = "../Frameworks/libcrypto.3.dylib";
 #elif defined PL_WINDOWS
         filename = "libcrypto-3.dll";
+#endif
+
+#ifndef PL_MACOS
+#ifdef PL_UNIX
+    lib = U_library_open("libcrypto.so");
+    if (!lib)
+        lib = U_library_open("libcrypto.so.3");
+    if (!lib)
+        lib = U_library_open("libcrypto.so.1.1");
+
+    return lib;
+#endif
 #endif
     }
 
