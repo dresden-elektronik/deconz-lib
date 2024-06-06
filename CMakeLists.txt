@@ -60,6 +60,8 @@ set(PUB_INCLUDE_FILES
     deconz/green_power.h
     deconz/green_power_controller.h
     deconz/nanbox.h
+    deconz/n_address.h
+    deconz/n_tcp.h
     deconz/touchlink.h
     deconz/touchlink_controller.h
     deconz/timeref.h
@@ -146,11 +148,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE n_tcp_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE u_threads_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE file_win32.c)
     target_link_libraries(${PROJECT_NAME} PRIVATE bcrypt)
 else()
+    target_sources(${PROJECT_NAME} PRIVATE n_tcp_unix.c)
     target_sources(${PROJECT_NAME} PRIVATE u_threads_pthreads.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_unix.c)
     target_sources(${PROJECT_NAME} PRIVATE u_random_getentropy.c)
