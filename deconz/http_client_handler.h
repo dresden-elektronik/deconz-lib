@@ -43,6 +43,8 @@ public:
     virtual void clientGone(QTcpSocket *sock) = 0;
 };
 
+int registerHttpClientHandler(deCONZ::HttpClientHandler *handler);
+
 } // namespace deCONZ
 
 #endif // DECONZ_HTTP_CLIENT_HANDLER_H
