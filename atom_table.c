@@ -117,6 +117,13 @@ void AT_Init(unsigned max_atoms)
         atom_table[i].len = 0;
         atom_table[i].data = 0;
     }
+
+    atom_table[0].len = 3;
+    atom_table[0].data = AT_AllocPageData(3); /* allocates also '\0' */;
+    atom_table[0].data[0] = 'N';
+    atom_table[0].data[1] = 'U';
+    atom_table[0].data[2] = 'L';
+    atom_table[0].data[3] = '\0';
 }
 
 void AT_Destroy(void)
