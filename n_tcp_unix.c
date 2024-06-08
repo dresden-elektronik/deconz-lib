@@ -21,7 +21,6 @@
 int N_TcpInit(N_TcpSocket *tcp, int af)
 {
     tcp->fd = 0;
-    tcp->handle = 0;
     tcp->addr.af = N_AF_UNKNOWN;
 
     if (af == N_AF_IPV4)
@@ -140,7 +139,7 @@ int N_TcpAccept(N_TcpSocket *tcp, N_TcpSocket *client)
     if (addrlen == sizeof(addr6))
     {
         client->port = addr6.sin6_port;
-        client->addr.af = N_AF_IPV6;
+        client->addr.af = N_AF_IPV6; /* this can also be a mapped IPv4 address */
         U_memcpy(&client->addr.data[0], &addr6.sin6_addr, 16);
     }
     else if (addrlen == sizeof(*addr4))
@@ -191,7 +190,6 @@ int N_TcpCanRead(N_TcpSocket *tcp)
     }
 
     return 0;
-
 }
 
 int N_TcpCanWrite(N_TcpSocket *tcp)
@@ -224,7 +222,7 @@ int N_TcpRead(N_TcpSocket *tcp, void *buf, unsigned maxlen)
 {
     ssize_t n;
 
-    U_ASSERT(0x7FFFFFFF < maxlen); /* positive int range */
+    U_ASSERT(maxlen <= 0x7FFFFFFF); /* positive int range */
 
     if (tcp->fd)
     {
@@ -281,7 +279,6 @@ int N_TcpWrite(N_TcpSocket *tcp, const void *buf, unsigned len)
                 break;
             }
         }
-        return (int)n;
     }
 
     return (int)pos;

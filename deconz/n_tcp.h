@@ -18,10 +18,16 @@ typedef struct N_TcpSocket
     N_Address addr;
     unsigned short port;
 
-    union {
-        int fd; /* UNIX */
-        void *handle; /* Windows */
-    };
+#if defined(_WIN32) || defined(_WIN64)
+#ifdef _WIN64
+        unsigned long long int fd;
+#else  /* Windows 32-bit build */
+        unsigned int fd;
+#endif
+#else /* UNIX */
+        int fd;
+#endif
+
 } N_TcpSocket;
 
 #ifdef __cplusplus
