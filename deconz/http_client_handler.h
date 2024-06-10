@@ -20,16 +20,11 @@ class QHttpRequestHeader;
 namespace deCONZ
 {
 
+DECONZ_DLLSPEC int HttpSend(unsigned int handle, const void *buf, unsigned len);
+
 class DECONZ_DLLSPEC HttpClientHandler
 {
 public:
-    /*enum Status
-    {
-        StatusOk          =  0,
-        StatusBusy        = -1,
-        StatusNoNetwork   = -2
-    };*/
-
     HttpClientHandler();
     virtual ~HttpClientHandler();
     virtual bool isHttpTarget(const QHttpRequestHeader &hdr) = 0;

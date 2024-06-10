@@ -61,6 +61,7 @@ set(PUB_INCLUDE_FILES
     deconz/green_power_controller.h
     deconz/nanbox.h
     deconz/n_address.h
+    deconz/n_ssl.h
     deconz/n_tcp.h
     deconz/touchlink.h
     deconz/touchlink_controller.h
@@ -108,6 +109,7 @@ add_library(${PROJECT_NAME} SHARED
     green_power.cpp
     green_power_controller.cpp
     nanbox.c
+    n_ssl.c
     util.cpp
     u_arena.c
     u_bstream.c
@@ -173,7 +175,10 @@ if (OPENSSL_FOUND)
     else()
         target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
     endif()
-    target_sources(${PROJECT_NAME} PRIVATE u_random_openssl.c)
+    target_sources(${PROJECT_NAME} PRIVATE
+        u_random_openssl.c
+        n_ssl_openssl.h
+        n_ssl_openssl.c)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_NAME deCONZ)
