@@ -15,7 +15,7 @@
 #define DBG_INFO     0x00000001
 #define DBG_ERROR    0x00000002
 #define DBG_PROT     0x00000004
-#define DBG_AIR      0x00000008
+#define DBG_VFS      0x00000008
 #define DBG_WIRE     0x00000010
 #define DBG_PROTBUF  0x00000020
 #define DBG_ZDP      0x00000040

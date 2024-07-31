@@ -63,7 +63,7 @@ static const std::array<DbgItem, 24> levelStrings = {
     DbgItem{DBG_INFO, "INFO"},
     DbgItem{DBG_ERROR, "ERROR"},
     DbgItem{DBG_PROT, "PROT"},
-    DbgItem{DBG_AIR, "AIR"},
+    DbgItem{DBG_VFS, "VFS"},
     DbgItem{DBG_WIRE, "WIRE"},
     DbgItem{DBG_PROTBUF, "PROTBUF"},
     DbgItem{DBG_ZDP, "ZDP"},
