@@ -86,7 +86,7 @@ static unsigned char *AT_AllocPageData(unsigned size)
     unsigned char *p = 0;
 
     size += 1; /* terminating '\0' */
-    if (atom_page_beg + size > atom_page_end)
+    if (!atom_pages || (atom_page_beg + size > atom_page_end))
     {
         AT_AllocPage();
     }
