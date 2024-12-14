@@ -17,7 +17,7 @@
 #include "deconz/qhttprequest_compat.h"
 
 static constexpr char nullByte = '\0';
-static constexpr QLatin1String emptyString{&nullByte, 0};
+static constexpr QLatin1StringView emptyString{};
 
 enum
 {
@@ -49,13 +49,13 @@ class UrlDescriptor
     std::array<Component, MaxComponents> m_comp{};
 
 public:
-    QLatin1String path() const;
-    QLatin1String component(size_t i) const;
+    QLatin1StringView path() const;
+    QLatin1StringView component(size_t i) const;
     Http::HttpStatus parseUrl(const char *buf, size_t length);
     size_t componentCount() const { return m_compCount; }
 };
 
-QLatin1String UrlDescriptor::path() const
+QLatin1StringView UrlDescriptor::path() const
 {
     if (m_length == 0)
     {
@@ -63,11 +63,11 @@ QLatin1String UrlDescriptor::path() const
     }
     else if (m_query < m_length)
     {
-        return QLatin1String(m_buf, m_query);
+        return QLatin1StringView(m_buf, m_query);
     }
     else
     {
-        return QLatin1String(m_buf, m_length);
+        return QLatin1StringView(m_buf, m_length);
     }
 }
 
@@ -155,10 +155,10 @@ public:
     };
 
     UrlDescriptor urlDescriptor;
-    QLatin1String cMethod{emptyString};
-    QLatin1String cUrl{emptyString};
-    QLatin1String lastKey{emptyString};
-    QLatin1String lastKeyVal{emptyString};
+    QLatin1StringView cMethod{emptyString};
+    QLatin1StringView cUrl{emptyString};
+    QLatin1StringView lastKey{emptyString};
+    QLatin1StringView lastKeyVal{emptyString};
 
     Http::HttpStatus parseStatus = Http::HttpStatusBadRequest;
     uint16_t rawSize = 0;

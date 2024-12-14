@@ -10,7 +10,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Core Gui SerialPort REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui SerialPort REQUIRED)
 
 if (UNIX)
     include(FindPkgConfig)
@@ -194,9 +194,9 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE Qt${QT_VERSION_MAJOR}::Core
-    PRIVATE Qt${QT_VERSION_MAJOR}::Gui
-    PRIVATE Qt${QT_VERSION_MAJOR}::SerialPort
+	PRIVATE Qt${QT_VERSION_MAJOR}::Core
+	PRIVATE Qt${QT_VERSION_MAJOR}::Gui
+	PRIVATE Qt${QT_VERSION_MAJOR}::SerialPort
 )
 
 set_target_properties(${PROJECT_NAME}
