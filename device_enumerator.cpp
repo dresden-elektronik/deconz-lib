@@ -422,7 +422,7 @@ bool tryCreateDeviceFile(const QString &path)
 
     int ret = -2; // mknod returns -1 on error
     bool ok = false;
-    int minor = path.rightRef(1).toInt(&ok);
+    int minor = QStringView(path).last(1).toInt(&ok);
     const mode_t mode = S_IFCHR | 0660;
 
     QFile devicesList(QLatin1String("/sys/fs/cgroup/devices/devices.list"));

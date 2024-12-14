@@ -583,7 +583,7 @@ bool ZclAttribute::writeToStream(QDataStream &stream) const
 
     case ZclOctedString:
     {
-        if (d->m_value.isValid() && d->m_value.type() == QVariant::ByteArray)
+        if (d->m_value.isValid() && d->m_value.typeId() == QMetaType::QByteArray)
         {
             const QByteArray data = d->m_value.toByteArray();
 
@@ -3515,23 +3515,23 @@ void ZclDataBase::load(const QString &dbfile)
                                 }
                             }
 
-                            if (xmlAttributes.hasAttribute(QLatin1String("showas")))
+                            if (xmlAttributes.hasAttribute(QLatin1StringView("showas")))
                             {
-                                QStringRef showas = xmlAttributes.value(QLatin1String("showas"));
+                                QStringView showas = xmlAttributes.value(QLatin1StringView("showas"));
 
-                                if (showas == QLatin1String("hex"))
+                                if (showas == QLatin1StringView("hex"))
                                 {
                                     attr.setNumericBase(16);
                                 }
-                                else if (showas == QLatin1String("bin"))
+                                else if (showas == QLatin1StringView("bin"))
                                 {
                                     attr.setNumericBase(2);
                                 }
-                                else if (showas == QLatin1String("dec"))
+                                else if (showas == QLatin1StringView("dec"))
                                 {
                                     attr.setNumericBase(10);
                                 }
-                                else if (showas == QLatin1String("slider"))
+                                else if (showas == QLatin1StringView("slider"))
                                 {
                                     attr.setFormatHint(ZclAttribute::SliderFormat);
                                 }
@@ -3594,9 +3594,9 @@ void ZclDataBase::load(const QString &dbfile)
                                 }
                             }
 
-                            if (xmlAttributes.hasAttribute(QLatin1String("listSize")))
+                            if (xmlAttributes.hasAttribute(QLatin1StringView("listSize")))
                             {
-                                QStringRef listSize = xmlAttributes.value(QLatin1String("listSize"));
+                                QStringView listSize = xmlAttributes.value(QLatin1StringView("listSize"));
                                 uint16_t attrId = listSize.toUShort(&ok, 16);
 
                                 if (ok)

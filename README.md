@@ -16,10 +16,10 @@ Previously the library was a fixed part of deCONZ and build via QMake. The goal 
 ```
 apt-get install --no-install-recommends \
     build-essential \
-    qt5-default \
-    libqt5serialport5-dev \
-    libqt5websockets5-dev \
-    qtdeclarative5-dev  \
+    qt6-default \
+    libqt6serialport5-dev \
+    libqt6websockets5-dev \
+    qtdeclarative6-dev  \
     sqlite3 \
     libsqlite3-dev \
     libssl-dev \
@@ -38,10 +38,10 @@ cmake --build build
 
 ## Building on Windows
 
-1. Qt5 for MSVC and Visual Studio 2019 needs to be installed
+1. Qt6 for MSVC and Visual Studio 2019 needs to be installed
 
 2. Configure and compile
 
 ```
-cmake -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019\lib\cmake\Qt5 -A Win32 -S . -B build
+cmake -DCMAKE_PREFIX_PATH=C:\Qt\6.8.1\msvc2019\lib\cmake\Qt6 -A Win32 -S . -B build
 ```

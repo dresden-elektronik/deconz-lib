@@ -13,6 +13,7 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QProcessEnvironment>
+#include <QStandardPaths>
 #include <limits.h>
 #include <stdlib.h>
 #include <memory>
@@ -242,7 +243,7 @@ QString getStorageLocation(StorageLocation location)
 
         if (!found)
         {
-            loc = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
+            loc = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
             if (!loc.isEmpty())
             {
                 path = loc.first();
