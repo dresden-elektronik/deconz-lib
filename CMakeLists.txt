@@ -46,6 +46,27 @@ endif()
 
 # -------------------------------------------------------------------------
 
+# --- actor model -----------------------------------------------------
+if (NOT DECONZ_FULL_BUILD)
+
+FetchContent_Declare(
+  actormodel
+  GIT_REPOSITORY https://git.sr.ht/~cryo/actor_model
+  GIT_TAG        master
+)
+
+# FetchContent_MakeAvailable(actormodel)
+# FetchContent_MakeAvailable requires CMake 3.14, but Debian Buster has only 3.13
+
+FetchContent_GetProperties(actormodel)
+if (NOT actormodel_POPULATED)
+    FetchContent_Populate(actormodel)
+    add_subdirectory(${actormodel_SOURCE_DIR} ${actormodel_BINARY_DIR})
+endif()
+
+endif() # NOT DECONZ_FULL_BUILD
+# -------------------------------------------------------------------------
+
 set(PUB_INCLUDE_FILES
     deconz/aps.h
     deconz/aps_controller.h
@@ -197,6 +218,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE Qt${QT_VERSION_MAJOR}::Core
     PRIVATE Qt${QT_VERSION_MAJOR}::Gui
     PRIVATE Qt${QT_VERSION_MAJOR}::SerialPort
+    am_plugin_hdr
 )
 
 set_target_properties(${PROJECT_NAME}
