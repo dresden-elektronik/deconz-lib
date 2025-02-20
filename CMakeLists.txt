@@ -156,6 +156,8 @@ add_library(${PROJECT_NAME} SHARED
     timeref.cpp
     touchlink.cpp
     touchlink_controller.cpp
+    deconz/am_core.h
+    deconz/am_gui.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE U_LIBAPI_PRIVATE)
