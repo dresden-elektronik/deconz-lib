@@ -35,14 +35,14 @@ extern "C" {
 #define U_TIMER_REPEAT_INFINITE 0xFFFFFFFF
 
 /*! Public interface */
-int U_TimerStart(unsigned long actor_id, unsigned long timer_id, unsigned long timeout, unsigned long repeat);
-int U_TimerStop(unsigned long actor_id, unsigned long timer_id);
+U_LIBAPI int U_TimerStart(unsigned long actor_id, unsigned long timer_id, unsigned long timeout, unsigned long repeat);
+U_LIBAPI int U_TimerStop(unsigned long actor_id, unsigned long timer_id);
 
 
 /*! Following functions are only used by deCONZ core. */
-void U_TimerInit(void *am_api_fn);
-void U_TimerTick(long long diff);
-void U_TimerDestroy(void);
+U_LIBAPI void U_TimerInit(void *am_api_fn);
+U_LIBAPI void U_TimerTick(long long diff);
+U_LIBAPI void U_TimerDestroy(void);
 
 #ifdef __cplusplus
 }
