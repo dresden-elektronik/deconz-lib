@@ -19,7 +19,7 @@ int main(void)
 
         if (qstr != ustr.c_str())
         {
-            printf("ustr: %s, qstr: %s\n", ustr.c_str(), qPrintable(qstr));
+            printf("%d ustr: %s, qstr: %s\n", __LINE__, ustr.c_str(), qPrintable(qstr));
             return 1;
         }
     }
@@ -31,7 +31,7 @@ int main(void)
 
         if (qstr != ustr.c_str())
         {
-            printf("ustr: %s, qstr: %s\n", ustr.c_str(), qPrintable(qstr));
+            printf("%d ustr: %s, qstr: %s\n", __LINE__, ustr.c_str(), qPrintable(qstr));
             return 1;
         }
     }
@@ -43,7 +43,7 @@ int main(void)
 
         if (qstr != ustr.c_str())
         {
-            printf("ustr: %s, qstr: %s\n", ustr.c_str(), qPrintable(qstr));
+            printf("%d ustr: %s, qstr: %s\n", __LINE__, ustr.c_str(), qPrintable(qstr));
             return 1;
         }
     }
