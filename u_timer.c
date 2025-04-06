@@ -14,14 +14,6 @@
 #include "deconz/dbg_trace.h"
 #include <actor/plugin.h>
 
-enum CommonMessageIds
-{
-   M_ID_LIST_DIR_REQ = AM_MESSAGE_ID_COMMON_REQUEST(1),
-   M_ID_LIST_DIR_RSP = AM_MESSAGE_ID_COMMON_RESPONSE(1),
-   M_ID_READ_ENTRY_REQ = AM_MESSAGE_ID_COMMON_REQUEST(2),
-   M_ID_READ_ENTRY_RSP = AM_MESSAGE_ID_COMMON_RESPONSE(2)
-};
-
 enum SpecificMessageIds
 {
    M_ID_START_TIMER_REQ = AM_MESSAGE_ID_SPECIFIC_REQUEST(1),
