@@ -68,6 +68,9 @@ endif() # NOT DECONZ_FULL_BUILD
 # -------------------------------------------------------------------------
 
 set(PUB_INCLUDE_FILES
+    deconz/am_core.h
+    deconz/am_gui.h
+    deconz/am_vfs.h
     deconz/aps.h
     deconz/aps_controller.h
     deconz/atom.h
