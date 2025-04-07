@@ -12,7 +12,7 @@
  */
 
 /*
- * The message structures are documented in actor_model_vfs.md
+ * The message structures are documented in doc/actor_model_vfs.md
  */
 
 #define VFS_LS_DIR_ENTRY_FLAGS_IS_DIR 0x0001
@@ -31,5 +31,7 @@
 #define VFS_M_ID_READ_ENTRY_REQ AM_MESSAGE_ID_COMMON_REQUEST(2)
 #define VFS_M_ID_READ_ENTRY_RSP AM_MESSAGE_ID_COMMON_RESPONSE(2)
 #define VFS_M_ID_CHANGED_NTFY   AM_MESSAGE_ID_COMMON_NOTIFY(5)
+#define VFS_M_ID_ADDED_NTFY     AM_MESSAGE_ID_COMMON_NOTIFY(6)
+#define VFS_M_ID_REMOVED_NTFY   AM_MESSAGE_ID_COMMON_NOTIFY(7)
 
 #endif // AM_VFS_H
