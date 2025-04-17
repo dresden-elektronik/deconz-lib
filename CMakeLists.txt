@@ -26,17 +26,11 @@ include(FetchContent)
 # have an tested implementation, so use it for now.
 
 if (USE_MICRO_ECC)
-    FetchContent_Declare(
-      libuecc
-      GIT_REPOSITORY https://github.com/kmackay/micro-ecc.git
-      GIT_TAG        v1.1
-    )
-
-    # FetchContent_MakeAvailable(uecc)
-    # FetchContent_MakeAvailable requires CMake 3.14, but Debian Buster has only 3.13
     FetchContent_GetProperties(libuecc)
     if (NOT libuecc_POPULATED)
-        FetchContent_Populate(libuecc)
+        FetchContent_Populate(libuecc
+          GIT_REPOSITORY https://github.com/kmackay/micro-ecc.git
+          GIT_TAG        v1.1)
     endif()
 
     add_library(uECC STATIC ${libuecc_SOURCE_DIR}/uECC.c)
@@ -49,18 +43,11 @@ endif()
 # --- actor model -----------------------------------------------------
 if (NOT DECONZ_FULL_BUILD)
 
-FetchContent_Declare(
-  actormodel
-  GIT_REPOSITORY https://git.sr.ht/~cryo/actor_model
-  GIT_TAG        master
-)
-
-# FetchContent_MakeAvailable(actormodel)
-# FetchContent_MakeAvailable requires CMake 3.14, but Debian Buster has only 3.13
-
 FetchContent_GetProperties(actormodel)
 if (NOT actormodel_POPULATED)
-    FetchContent_Populate(actormodel)
+    FetchContent_Populate(actormodel
+      GIT_REPOSITORY https://git.sr.ht/~cryo/actor_model
+      GIT_TAG        master)
     add_subdirectory(${actormodel_SOURCE_DIR} ${actormodel_BINARY_DIR})
 endif()
 
