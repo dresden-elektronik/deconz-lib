@@ -84,6 +84,7 @@ extern "C" {
 #endif
 
 U_LIBAPI int U_thread_create(U_Thread *th, void (*func)(void *), void *arg);
+U_LIBAPI int U_thread_set_name(U_Thread *th, const char *name);
 U_LIBAPI int U_thread_join(U_Thread *th);
 U_LIBAPI void U_thread_exit(int result);
 U_LIBAPI void U_thread_msleep(unsigned long milliseconds);

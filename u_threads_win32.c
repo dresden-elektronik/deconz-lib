@@ -29,6 +29,15 @@ int U_thread_create(U_Thread *th, void (*func)(void *), void *arg)
     return 1;
 }
 
+int U_thread_set_name(U_Thread *th, const char *name)
+{
+    /* TODO implement */
+    /* https://learn.microsoft.com/de-de/previous-versions/visualstudio/visual-studio-2015/debugger/how-to-set-a-thread-name-in-native-code?view=vs-2015&redirectedfrom=MSDN */
+    (void)th;
+    (void)name;
+    return 0;
+}
+
 int U_thread_join(U_Thread *th)
 {
     DWORD ret;

@@ -23,6 +23,29 @@ int U_thread_create(U_Thread *th, void (*func)(void *), void *arg)
     return 1;
 }
 
+int U_thread_set_name(U_Thread *th, const char *name)
+{
+    /* Platform specific:
+     * Linux
+     *   int pthread_setname_np(pthread_t thread, const char *name);
+     * NetBSD: name + arg work like printf(name, arg)
+     *   int pthread_setname_np(pthread_t thread, const char *name, void *arg);
+     * FreeBSD & OpenBSD: function name is slightly different, and has no return value
+     *   void pthread_set_name_np(pthread_t tid, const char *name);
+     * Mac OS X: must be set from within the thread (can't specify thread ID)
+     *   int pthread_setname_np(const char*);
+     */
+#ifdef __LINUX__
+    if (0 == pthread_setname_np(th->thread, name))
+        return 1;
+#endif
+#ifdef __APPLE__
+    if (0 == pthread_setname_np(name))
+        return 1;
+#endif
+    return 0;
+}
+
 int U_thread_join(U_Thread *th)
 {
     int ret;
