@@ -2,7 +2,7 @@
 #define U_RAND32_H
 
 /*
- * Copyright (c) 2012-2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2012-2025 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -11,13 +11,17 @@
  *
  */
 
-#ifndef U_LIBAPI
+#ifndef U_LIBAP
 #ifdef _WIN32
   #ifdef USE_ULIB_SHARED
     #define U_LIBAPI  __declspec(dllimport)
   #endif
   #ifdef BUILD_ULIB_SHARED
     #define U_LIBAPI  __declspec(dllexport)
+  #endif
+#elif defined(__GNUC__) /* Unix */
+  #if defined(BUILD_ULIB_SHARED) || defined(USE_ULIB_SHARED)
+    #define U_LIBAPI  __attribute__ ((visibility("default")))
   #endif
 #endif
 #endif /* ! defined(U_LIBAPI) */

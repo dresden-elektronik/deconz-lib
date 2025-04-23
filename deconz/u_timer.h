@@ -19,6 +19,10 @@
   #ifdef BUILD_ULIB_SHARED
     #define U_LIBAPI  __declspec(dllexport)
   #endif
+#elif defined(__GNUC__) /* Unix */
+  #if defined(BUILD_ULIB_SHARED) || defined(USE_ULIB_SHARED)
+    #define U_LIBAPI  __attribute__ ((visibility("default")))
+  #endif
 #endif
 #endif /* ! defined(U_LIBAPI) */
 
