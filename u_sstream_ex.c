@@ -35,6 +35,49 @@ void U_sstream_put_mac_address(U_SStream *ss, unsigned long long mac)
     ss->str[ss->pos] = '\0';
 }
 
+unsigned long long U_sstream_get_mac_address(U_SStream *ss)
+{
+    char ch;
+    unsigned i;
+    unsigned long long result;
+    unsigned colon_mask = 0x124924;
+
+    result = 0;
+
+    if (ss->status != U_SSTREAM_OK)
+        return result;
+
+    /* 00:11:22:33:44:55:66:77 */
+    if ((ss->len - ss->pos) < 23)
+    {
+        ss->status = U_SSTREAM_ERR_RANGE;
+        return result;
+    }
+
+    for (i = 0; i < 23; i++)
+    {
+        ch = ss->str[ss->pos];
+        ss->pos++;
+        if      (ch >= '0' && ch <= '9') ch = ch - '0';
+        else if (ch >= 'a' && ch <= 'f') ch = (ch - 'a') + 10;
+        else if (ch >= 'A' && ch <= 'F') ch = (ch - 'A') + 10;
+        else if (ch == ':' && colon_mask & (1 << i))
+        {
+            continue;
+        }
+        else
+        {
+            ss->status = U_SSTREAM_ERR_INVALID;
+            result = 0;
+            break;
+        }
+        result <<= 4;
+        result += (ch & 0xF);
+    }
+
+    return result;
+}
+
 unsigned char U_sstream_get_hex_byte(U_SStream *ss)
 {
     unsigned i;

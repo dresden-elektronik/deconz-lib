@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2024-2025 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -21,8 +21,9 @@
 extern "C" {
 #endif
 
-/*! Writes MAc address to stream:  00:11:22:33:44:55:66:77 */
+/*! Writes MAC address to stream:  00:11:22:33:44:55:66:77 */
 U_LIBAPI void U_sstream_put_mac_address(U_SStream *ss, unsigned long long mac);
+U_LIBAPI unsigned long long U_sstream_get_mac_address(U_SStream *ss);
 /*! Parses a hex value (without 0x prefix) and returns as byte: for example FF -> 255 */
 U_LIBAPI unsigned char U_sstream_get_hex_byte(U_SStream *ss);
 
