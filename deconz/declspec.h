@@ -15,6 +15,8 @@
 
 #ifdef _WIN32
 
+    #define DECONZ_EXPORT  __declspec(dllexport)
+
 #ifdef BUILD_ULIB_SHARED
     #define DECONZ_DLLSPEC  __declspec(dllexport)
 #else
@@ -24,8 +26,10 @@
 #else // Unix
 
 #ifdef __GNUC__
+#define DECONZ_EXPORT __attribute__ ((visibility("default")))
 #define DECONZ_DLLSPEC __attribute__ ((visibility("default")))
 #else
+#define DECONZ_EXPORT
 #define DECONZ_DLLSPEC
 #endif
 
