@@ -15,6 +15,9 @@
  * The message structures are documented in doc/actor_model_vfs.md
  */
 
+#include "actor/plugin.h"
+#include "deconz/declspec.h"
+
 #define VFS_LS_DIR_ENTRY_FLAGS_IS_DIR 0x0001
 
 #define VFS_ENTRY_MODE_READONLY 0
@@ -33,5 +36,42 @@
 #define VFS_M_ID_CHANGED_NTFY   AM_MESSAGE_ID_COMMON_NOTIFY(5)
 #define VFS_M_ID_ADDED_NTFY     AM_MESSAGE_ID_COMMON_NOTIFY(6)
 #define VFS_M_ID_REMOVED_NTFY   AM_MESSAGE_ID_COMMON_NOTIFY(7)
+
+
+#define AM_MAX_URL_ELEMENTS 16
+
+typedef struct
+{
+    am_string url;
+    unsigned element_count;
+    unsigned char elements[AM_MAX_URL_ELEMENTS];
+} am_url_parse;
+
+typedef struct
+{
+    unsigned short tag;
+    unsigned req_index;
+    unsigned max_count;
+    am_url_parse url_parse;
+} am_ls_dir_req;
+
+typedef struct
+{
+    unsigned short tag;
+    am_url_parse url_parse;
+} am_read_entry_req;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+DECONZ_DLLSPEC am_string AM_UrlElementAt(am_url_parse *up, unsigned idx);
+DECONZ_DLLSPEC int AM_ParseUrl(am_url_parse *up);
+DECONZ_DLLSPEC int AM_ParseListDirectoryRequest(struct am_api_functions *am, struct am_message *msg, am_ls_dir_req *req);
+DECONZ_DLLSPEC int AM_ParseReadEntryRequest(struct am_api_functions *am, struct am_message *msg, am_read_entry_req *req);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // AM_VFS_H

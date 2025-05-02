@@ -113,6 +113,7 @@ set(PUB_INCLUDE_FILES
 add_library(${PROJECT_NAME} SHARED
     ${PUB_INCLUDE_FILES}
 
+    am_vfs.c
     aps.cpp
     aps_controller.cpp
     atom_table.c
