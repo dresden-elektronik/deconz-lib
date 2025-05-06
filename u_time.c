@@ -38,66 +38,61 @@
       ±hhmm
       ±hh
 */
-#ifdef _WIN32
-  /* https://stackoverflow.com/questions/16647819/timegm-cross-platform */
-  #define timegm _mkgmtime
-#endif
-
 U_Time U_TimeFromISO8601(const char *str, unsigned len)
 {
     U_Time result;
     U_SStream ss;
-    struct tm time;
+    struct tm time_;
     int millisec;
 
-    U_memset(&time, 0, sizeof(time));
+    U_memset(&time_, 0, sizeof(time_));
     millisec = 0;
-    time.tm_isdst = -1;
+    time_.tm_isdst = -1;
     U_sstream_init(&ss, (void*)str, len);
 
-    time.tm_year = U_sstream_get_long(&ss);
-    if (ss.pos != 4 || U_sstream_peek_char(&ss) != '-' || time.tm_year < 1900)
+    time_.tm_year = U_sstream_get_long(&ss);
+    if (ss.pos != 4 || U_sstream_peek_char(&ss) != '-' || time_.tm_year < 1900)
         goto err;
-    time.tm_year -= 1900;
+    time_.tm_year -= 1900;
     U_sstream_seek(&ss, ss.pos + 1);
 
-    time.tm_mon = U_sstream_get_long(&ss);
-    if (ss.pos != 7 || U_sstream_peek_char(&ss) != '-' || time.tm_mon < 1 || time.tm_mon > 12)
+    time_.tm_mon = U_sstream_get_long(&ss);
+    if (ss.pos != 7 || U_sstream_peek_char(&ss) != '-' || time_.tm_mon < 1 || time_.tm_mon > 12)
         goto err;
-    time.tm_mon -= 1;
+    time_.tm_mon -= 1;
     U_sstream_seek(&ss, ss.pos + 1);
 
-    time.tm_mday = U_sstream_get_long(&ss);
-    if (ss.pos != 10 || time.tm_mday < 1 || time.tm_mday > 31) /* 32 (?) */
+    time_.tm_mday = U_sstream_get_long(&ss);
+    if (ss.pos != 10 || time_.tm_mday < 1 || time_.tm_mday > 31) /* 32 (?) */
         goto err;
 
     if (U_sstream_peek_char(&ss) == 'T')
     {
         U_sstream_seek(&ss, ss.pos + 1);
 
-        time.tm_hour = U_sstream_get_long(&ss);
-        if (ss.pos != 13 || time.tm_hour < 0 || time.tm_hour > 23)
+        time_.tm_hour = U_sstream_get_long(&ss);
+        if (ss.pos != 13 || time_.tm_hour < 0 || time_.tm_hour > 23)
             goto err;
 
         if (U_sstream_peek_char(&ss) == ':') /* optional minutes */
         {
             U_sstream_seek(&ss, ss.pos + 1);
 
-            time.tm_min = U_sstream_get_long(&ss);
-            if (ss.pos != 16 || time.tm_min < 0 || time.tm_min > 59)
+            time_.tm_min = U_sstream_get_long(&ss);
+            if (ss.pos != 16 || time_.tm_min < 0 || time_.tm_min > 59)
                 goto err;
 
             if (U_sstream_peek_char(&ss) == ':') /* optional seconds */
             {
                 U_sstream_seek(&ss, ss.pos + 1);
 
-                time.tm_sec = U_sstream_get_long(&ss);
-                if (ss.pos != 19 || time.tm_sec < 0 || time.tm_sec > 60)
+                time_.tm_sec = U_sstream_get_long(&ss);
+                if (ss.pos != 19 || time_.tm_sec < 0 || time_.tm_sec > 60)
                     goto err;
 
-                if (time.tm_sec == 60)
+                if (time_.tm_sec == 60)
                 {
-                    time.tm_sec -= 1;
+                    time_.tm_sec -= 1;
                     /* todo leap second */
                 }
 
@@ -113,7 +108,12 @@ U_Time U_TimeFromISO8601(const char *str, unsigned len)
     errno = 0;
     if (U_sstream_peek_char(&ss) == 'Z')
     {
-        result = timegm(&time) * 1000;
+#ifdef _WIN32
+        result = _mkgmtime(&time_);
+#else
+        result = timegm(&time_);
+#endif
+        result *= 1000;
     }
     else if (U_sstream_peek_char(&ss) == '+' || U_sstream_peek_char(&ss) == '-')
     {
@@ -126,7 +126,12 @@ U_Time U_TimeFromISO8601(const char *str, unsigned len)
     }
     else
     {
-        result = mktime(&time) * 1000;
+#ifdef _WIN32
+        result = mktime(&time_);
+#else
+        result = mktime(&time_);
+#endif
+        result *= 1000;
     }
 
     if (errno)
