@@ -17,7 +17,7 @@
 #define DBG_PROT     0x00000004
 #define DBG_VFS      0x00000008
 #define DBG_WIRE     0x00000010
-#define DBG_PROTBUF  0x00000020
+#define DBG_FIRMWARE 0x00000020
 #define DBG_ZDP      0x00000040
 #define DBG_ZCL      0x00000080
 #define DBG_APS      0x00000100
