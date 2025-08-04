@@ -583,7 +583,7 @@ bool ZclAttribute::writeToStream(QDataStream &stream) const
 
     case ZclOctedString:
     {
-        if (d->m_value.isValid() && d->m_value.type() == QVariant::ByteArray)
+        if (d->m_value.isValid() && d->m_value.userType() == QVariant::ByteArray)
         {
             const QByteArray data = d->m_value.toByteArray();
 
@@ -3517,7 +3517,7 @@ void ZclDataBase::load(const QString &dbfile)
 
                             if (xmlAttributes.hasAttribute(QLatin1String("showas")))
                             {
-                                QStringRef showas = xmlAttributes.value(QLatin1String("showas"));
+                                const auto showas = xmlAttributes.value(QLatin1String("showas"));
 
                                 if (showas == QLatin1String("hex"))
                                 {
@@ -3596,7 +3596,7 @@ void ZclDataBase::load(const QString &dbfile)
 
                             if (xmlAttributes.hasAttribute(QLatin1String("listSize")))
                             {
-                                QStringRef listSize = xmlAttributes.value(QLatin1String("listSize"));
+                                const auto listSize = xmlAttributes.value(QLatin1String("listSize"));
                                 uint16_t attrId = listSize.toUShort(&ok, 16);
 
                                 if (ok)
