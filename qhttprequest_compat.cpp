@@ -17,7 +17,7 @@
 #include "deconz/qhttprequest_compat.h"
 
 static constexpr char nullByte = '\0';
-static constexpr QLatin1String emptyString{&nullByte, qsizetype(0)};
+static constexpr QLatin1String emptyString{&nullByte, int(0)};
 
 enum
 {
