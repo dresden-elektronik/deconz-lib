@@ -4036,9 +4036,32 @@ void ZclDataBase::load(const QString &dbfile)
 
 void ZclDataBase::initDbFile(const QString &zclFile)
 {
+    int found = 0;
     QFile file(zclFile);
 
     DBG_Printf(DBG_INFO, "ZCLDB init file %s\n", qPrintable(zclFile));
+
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream stream(&file);
+
+        while (!stream.atEnd())
+        {
+            const QString path = stream.readLine(1024).trimmed();
+            if (path.endsWith(".xml"))
+            {
+                if (QFile::exists(path) && path.contains("general.xml"))
+                    found++;
+            }
+        }
+
+        file.close();
+    }
+
+    if (QFile::exists(zclFile) && found == 0)
+    {
+        QFile::remove(zclFile); // could happen when installation moves
+    }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text) || (file.size() <= 0))
     {
