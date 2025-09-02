@@ -1602,6 +1602,12 @@ bool ZclAttribute::isReadonly() const
     return (d->m_access == ZclRead);
 }
 
+bool ZclAttribute::isWriteonly() const
+{
+    Q_D(const ZclAttribute);
+    return (d->m_access == ZclWrite);
+}
+
 bool ZclAttribute::isMandatory() const
 {
     Q_D(const ZclAttribute);

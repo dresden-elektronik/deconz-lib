@@ -768,6 +768,8 @@ Shorthand for creating type safe manufacturer codes from numbers but without cas
         int64_t lastRead() const;
         /*! Returns true if the attribute is read only. */
         bool isReadonly() const;
+        /*! Returns true if the attribute is write only. */
+        bool isWriteonly() const;
         /*! Returns true if the attribute is mandatory. */
         bool isMandatory() const;
         /*! Returns true if the attribute is available on the device. */
