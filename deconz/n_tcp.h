@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 DECONZ_DLLSPEC int N_TcpInit(N_TcpSocket *tcp, int af);
-DECONZ_DLLSPEC int N_TcpConnect(N_TcpSocket *tcp);
+DECONZ_DLLSPEC int N_TcpConnect(N_TcpSocket *tcp, const char *host, unsigned short port);
 DECONZ_DLLSPEC int N_TcpBind(N_TcpSocket *tcp, const N_Address *addr, unsigned short port);
 DECONZ_DLLSPEC int N_TcpListen(N_TcpSocket *tcp, int backlog);
 DECONZ_DLLSPEC int N_TcpAccept(N_TcpSocket *tcp, N_TcpSocket *client);
