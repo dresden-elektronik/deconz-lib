@@ -66,6 +66,7 @@ DECONZ_DLLSPEC long FS_WriteFile(FS_File *fp, const void *buf, long size);
 DECONZ_DLLSPEC int FS_SeekFile(FS_File *fp, long offset, int whence);
 DECONZ_DLLSPEC int FS_TruncateFile(FS_File *fp, long size);
 DECONZ_DLLSPEC int FS_DeleteFile(const char *path);
+DECONZ_DLLSPEC int FS_FileExists(const char *path);
 
 DECONZ_DLLSPEC int FS_OpenDir(FS_Dir *dir, const char *path);
 DECONZ_DLLSPEC int FS_ReadDir(FS_Dir *dir);

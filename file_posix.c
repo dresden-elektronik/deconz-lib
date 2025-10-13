@@ -160,6 +160,16 @@ int FS_DeleteFile(const char *path)
     return 0;
 }
 
+int FS_FileExists(const char *path)
+{
+    struct stat sb;
+
+    if (stat(path, &sb) == -1)
+        return 0;
+
+    return 1;
+}
+
 int FS_OpenDir(FS_Dir *dir, const char *path)
 {
     dir->p = opendir(path);
