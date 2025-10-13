@@ -39,10 +39,10 @@ int N_SslInit(void)
     return 0;
 }
 
-int N_SslServerInit(N_SslSocket *sock, N_Address *addr, unsigned short port)
+int N_SslServerInit(N_SslSocket *sock, N_Address *addr, unsigned short port, const char *certpath)
 {
     if (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
-        return N_SslServerInitOpenSsl(sock, addr, port);
+        return N_SslServerInitOpenSsl(sock, addr, port, certpath);
 
     return 0;
 }
@@ -83,6 +83,14 @@ int N_SslCanRead(N_SslSocket *sock)
 {
     if  (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
         return N_SslCanReadOpenSsl(sock);
+
+    return 0;
+}
+
+int N_SslClose(N_SslSocket *sock)
+{
+    if  (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
+        return N_SslCloseOpenSsl(sock);
 
     return 0;
 }

@@ -14,12 +14,13 @@
 #include "deconz/n_ssl.h"
 
 int N_SslInitOpenSsl(void);
-int N_SslServerInitOpenSsl(N_SslSocket *sock, N_Address *addr, unsigned short port);
+int N_SslServerInitOpenSsl(N_SslSocket *sock, N_Address *addr, unsigned short port, const char *certpath);
 int N_SslAcceptOpenSsl(N_SslSocket *srv, N_SslSocket *cli);
 int N_SslHandshakeOpenSsl(N_SslSocket *sock);
 int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len);
 int N_SslReadOpenSsl(N_SslSocket *sock, void *buf, unsigned len);
 int N_SslCanReadOpenSsl(N_SslSocket *sock);
+int N_SslCloseOpenSsl(N_SslSocket *sock);
 
 #endif /* N_SSL_OPENSSL_H */
 
