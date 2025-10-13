@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2024-2025 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -8,6 +8,7 @@
  *
  */
 
+#include <stddef.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 
@@ -518,45 +519,6 @@ err:
     return 0;
 }
 
-
-int N_SslWriteOpenSslBackup(N_SslSocket *sock, const void *buf, unsigned len)
-{
-    int n_ssl;
-    int n_enc;
-    N_PrivOpenSsl *priv;
-    char bbuf[4096]; /* TODO does this has to be so big? */
-
-    priv = (N_PrivOpenSsl*)&sock->_data[0];
-
-    if (len == 0)
-        return 0;
-
-    if (!priv->ssl)
-        return 0;
-
-    if (N_TcpCanWrite(&sock->tcp) == 0)
-        return 0;
-
-    if (len > sizeof(bbuf) / 2)
-        len = sizeof(bbuf) / 2;
-
-    n_ssl = libSSL_write(priv->ssl, buf, len);
-    if (n_ssl <= 0)
-        return 0;
-
-    n_enc = libBIO_read(priv->wbio, bbuf, sizeof(bbuf));
-    U_ASSERT(n_enc > 0);
-    if (n_enc >= n_ssl) /* shouldn't be smaller */
-    {
-        if (N_TcpWrite(&sock->tcp, bbuf, n_enc) != n_enc)
-            return 0;
-
-        return n_ssl;
-    }
-
-    return 0;
-}
-
 int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len)
 {
     int n_ssl;
@@ -564,6 +526,7 @@ int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len)
     unsigned outlen;
     unsigned written = 0;
     N_PrivOpenSsl *priv;
+    const char *in = buf;
     char bbuf[4096]; /* TODO does this has to be so big? */
 
     priv = (N_PrivOpenSsl*)&sock->_data[0];
@@ -584,7 +547,7 @@ int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len)
         if (outlen > sizeof(bbuf) / 2)
             outlen = sizeof(bbuf) / 2;
 
-        n_ssl = libSSL_write(priv->ssl, &buf[written], outlen);
+        n_ssl = libSSL_write(priv->ssl, &in[written], outlen);
         if (n_ssl <= 0)
             return 0;
 
