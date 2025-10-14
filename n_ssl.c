@@ -39,10 +39,10 @@ int N_SslInit(void)
     return 0;
 }
 
-int N_SslServerInit(N_SslSocket *sock, N_Address *addr, unsigned short port, const char *certpath)
+int N_SslServerInit(N_SslSocket *sock, N_Address *addr, unsigned short port, const char *certpath, const char *keypath)
 {
     if (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
-        return N_SslServerInitOpenSsl(sock, addr, port, certpath);
+        return N_SslServerInitOpenSsl(sock, addr, port, certpath, keypath);
 
     return 0;
 }

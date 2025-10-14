@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 DECONZ_DLLSPEC int N_SslInit(void);
-DECONZ_DLLSPEC int N_SslServerInit(N_SslSocket *, N_Address*, unsigned short port, const char *certpath);
+DECONZ_DLLSPEC int N_SslServerInit(N_SslSocket *, N_Address*, unsigned short port, const char *certpath, const char *keypath);
 DECONZ_DLLSPEC int N_SslAccept(N_SslSocket *srv, N_SslSocket *cli);
 DECONZ_DLLSPEC int N_SslHandshake(N_SslSocket *sock);
 DECONZ_DLLSPEC int N_SslRead(N_SslSocket *sock, void *buf, unsigned maxlen);

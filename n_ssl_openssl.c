@@ -22,7 +22,6 @@
 #include "deconz/u_assert.h"
 #include "deconz/u_library_ex.h"
 #include "deconz/u_memory.h"
-#include "deconz/u_sstream.h"
 #include "deconz/file.h"
 #include "n_ssl_openssl.h"
 
@@ -323,7 +322,7 @@ err:
     return 0;
 }
 
-int N_SslServerInitOpenSsl(N_SslSocket *sock, N_Address *addr, unsigned short port, const char *certpath)
+int N_SslServerInitOpenSsl(N_SslSocket *sock, N_Address *addr, unsigned short port, const char *certpath, const char *keypath)
 {
     U_ASSERT(sock);
     U_ASSERT(addr);
@@ -333,25 +332,14 @@ int N_SslServerInitOpenSsl(N_SslSocket *sock, N_Address *addr, unsigned short po
     N_PrivOpenSsl *priv;
     const SSL_METHOD *method;
     const BIO_METHOD *biomethod;
-    U_SStream ss;
-    char cert[2048];
-    char key[2048];
 
-    U_sstream_init(&ss, cert, sizeof(cert));
-    U_sstream_put_str(&ss, certpath);
-    U_sstream_put_str(&ss, "/cert.pem");
-
-    U_sstream_init(&ss, key, sizeof(key));
-    U_sstream_put_str(&ss, certpath);
-    U_sstream_put_str(&ss, "/key.pem");
-
-    if ((0 == FS_FileExists(cert)) || (0 == FS_FileExists(key)))
+    if ((0 == FS_FileExists(certpath)) || (0 == FS_FileExists(keypath)))
     {
         const int rsa_bits = 4096;
         const int validity_days = 365*42;
         const char *cn = "localhost";
 
-        if (n_SslCreateSelfSignedCert(key, cert, rsa_bits, validity_days, cn) != 1)
+        if (n_SslCreateSelfSignedCert(keypath, certpath, rsa_bits, validity_days, cn) != 1)
         {
           return 0;
         }
@@ -383,10 +371,10 @@ int N_SslServerInitOpenSsl(N_SslSocket *sock, N_Address *addr, unsigned short po
     if (!priv->ctx)
         goto err;
 
-    if (libSSL_CTX_use_certificate_file(priv->ctx, cert,  SSL_FILETYPE_PEM) != 1)
+    if (libSSL_CTX_use_certificate_file(priv->ctx, certpath,  SSL_FILETYPE_PEM) != 1)
           goto err;
 
-    if (libSSL_CTX_use_PrivateKey_file(priv->ctx, key, SSL_FILETYPE_PEM) != 1)
+    if (libSSL_CTX_use_PrivateKey_file(priv->ctx, keypath, SSL_FILETYPE_PEM) != 1)
         goto err;
 
     return 1;
