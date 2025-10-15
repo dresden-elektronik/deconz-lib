@@ -56,7 +56,8 @@ enum U16Parameter
 {
     ParamPANID,    //!< the short PANID
     ParamNwkAddress, //!< the network address of the device
-    ParamHttpPort    //!< the http server port
+    ParamHttpPort,    //!< the HTTP server port
+    ParamHttpsPort    //!< the HTTPS server port
 };
 
 /*! Parameters of type uint32_t.
