@@ -318,6 +318,10 @@ int N_TcpRead(N_TcpSocket *tcp, void *buf, unsigned maxlen)
                     continue;
                 if (n == WSAENOTCONN || n == WSAESHUTDOWN)
                     tcp->fd = INVALID_SOCKET;
+                if (n == WSAECONNABORTED)
+                {
+                    N_TcpClose(tcp);
+                }
                 n = -1;
             }
             break;
