@@ -3,16 +3,95 @@
 #include <strsafe.h>
 #include "deconz/file.h"
 
+static int utf8ToWString(const char *str, PWCHAR out, unsigned outlen)
+{
+    *out = '\0';
+
+    if (!str)
+        return 0;
+
+    int required_size = MultiByteToWideChar(
+        CP_UTF8,       // Code page
+        0,             // Flags
+        str, // Source UTF-8 string
+        -1,           // Length of source string in bytes (-1 for null-terminated)
+        NULL,          // Unused - no output buffer yet
+        0              // Unused - buffer size is 0
+    );
+
+    if (required_size == 0 || outlen < required_size)
+        return 0;
+
+    int result = MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        str,
+        -1,
+        &out[0], // Pointer to the output buffer
+        required_size    // Size of the output buffer
+    );
+
+    if (result != 0 && result < outlen)
+    {
+        out[result] = '\0';
+        return 1;
+    }
+
+    return 0;
+}
+
+static int wstringToUtf8(const PWCHAR str, char *out, unsigned outlen)
+{
+    *out = '\0';
+
+    int required_size = WideCharToMultiByte(
+        CP_UTF8,            // Code page
+        0,                  // Flags
+        str, // Source wide string
+        -1,                 // Length of source string in characters (-1 for null-terminated)
+        NULL,               // Unused - no output buffer yet
+        0,                  // Unused - buffer size is 0
+        NULL,               // Unused
+        NULL                // Unused
+    );
+
+    if (0 < required_size && required_size < outlen)
+    {
+        int result = WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            str,
+            -1,
+            &out[0],    // Pointer to the output buffer
+            required_size,      // Size of the output buffer in bytes
+            NULL,
+            NULL
+        );
+
+        if (0 < result && result < outlen)
+        {
+            out[result] = '\0';
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 int FS_OpenFile(FS_File *fp, int flags, const char *path)
 {
     HANDLE f;
+    WCHAR wpath[MAX_PATH + 1];
 
     fp->fd = 0;
     fp->flags = 0;
 
+    if (utf8ToWString(path, wpath, MAX_PATH) == 0)
+        return 0;
+
     if ((flags & FS_MODE_RW) == FS_MODE_RW)
     {
-        f = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
+        f = CreateFileW(wpath, GENERIC_READ | GENERIC_WRITE,
                         FILE_SHARE_READ | FILE_SHARE_WRITE,
                         NULL,
                         CREATE_ALWAYS,
@@ -26,7 +105,7 @@ int FS_OpenFile(FS_File *fp, int flags, const char *path)
     }
     else if (flags == (FS_MODE_R))
     {
-        f = CreateFileA(path, GENERIC_READ,
+        f = CreateFileW(wpath, GENERIC_READ,
                         FILE_SHARE_READ,
                         NULL,
                         OPEN_EXISTING,
@@ -48,6 +127,24 @@ int FS_OpenFile(FS_File *fp, int flags, const char *path)
         fp->flags = flags;
         FS_SeekFile(fp, 0L, FS_SEEK_SET);
         return 1;
+    }
+
+    return 0;
+}
+
+int FS_FileExists(const char *path)
+{
+    WCHAR wpath[MAX_PATH + 1];
+    WIN32_FIND_DATA findFileData;
+
+    if (utf8ToWString(path, wpath, MAX_PATH))
+    {
+        HANDLE handle = FindFirstFileW(wpath, &findFileData);
+
+        if (handle != INVALID_HANDLE_VALUE) {
+            FindClose(handle); // Close the handle to avoid resource leaks
+            return 1;       // File exists
+        }
     }
 
     return 0;
@@ -154,7 +251,12 @@ int FS_TruncateFile(FS_File *fp, long size)
 
 int FS_DeleteFile(const char *path)
 {
-    if (DeleteFileA(path))
+    WCHAR wpath[MAX_PATH + 1];
+
+    if (utf8ToWString(path, wpath, MAX_PATH) == 0)
+        return 0;
+
+    if (DeleteFileW(wpath))
         return 1;
 
     return 0;
@@ -163,8 +265,13 @@ int FS_DeleteFile(const char *path)
 int FS_OpenDir(FS_Dir *dir, const char *path)
 {
     int i;
-    TCHAR szDir[MAX_PATH];
-    WIN32_FIND_DATA ffd;
+    WCHAR szDir[MAX_PATH + 1];
+    WCHAR wpath[MAX_PATH + 1];
+    WCHAR fname[0xFF + 1];
+    WIN32_FIND_DATAW ffd;
+
+    if (utf8ToWString(path, wpath, MAX_PATH) == 0)
+        return 0;
 
     dir->p = 0;
     dir->entry.type = FS_TYPE_UNKNOWN;
@@ -178,10 +285,10 @@ int FS_OpenDir(FS_Dir *dir, const char *path)
     if (i > (MAX_PATH - 3))
         return 0;
 
-    StringCchCopy(szDir, MAX_PACKAGE_NAME, path);
-    StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
+    StringCchCopyW(szDir, MAX_PACKAGE_NAME, wpath);
+    StringCchCatW(szDir, MAX_PATH, TEXT("\\*"));
 
-    dir->p = FindFirstFileA(szDir, &ffd);
+    dir->p = FindFirstFileW(szDir, &ffd);
 
     if (dir->p == INVALID_HANDLE_VALUE)
     {
@@ -190,29 +297,31 @@ int FS_OpenDir(FS_Dir *dir, const char *path)
     }
 
     // copy first entry
-    for (i = 0; ffd.cFileName[i]; i++)
-        dir->entry.name[i] = ffd.cFileName[i];
-
-    dir->entry.name[i] = '\0';
-
-    if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+    if (wstringToUtf8(ffd.cFileName, dir->entry.name, sizeof(dir->entry.name) - 1))
     {
-        dir->entry.type = FS_TYPE_DIRECTORY;
-    }
-    else
-    {
-        dir->entry.type = FS_TYPE_FILE;
+        if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            dir->entry.type = FS_TYPE_DIRECTORY;
+        }
+        else
+        {
+            dir->entry.type = FS_TYPE_FILE;
+        }
+
+        dir->state = 1; // mark that first read is already filled
+
+        return 1;
     }
 
-    dir->state = 1; // mark that first read is already filled
-
-    return 1;
+    // should not happen
+    FS_CloseDir(dir);
+    return 0;
 }
 
 int FS_ReadDir(FS_Dir *dir)
 {
     int i;
-    WIN32_FIND_DATA ffd;
+    WIN32_FIND_DATAW ffd;
 
     if (dir->state == 1) // first call return existing result
     {
@@ -223,23 +332,21 @@ int FS_ReadDir(FS_Dir *dir)
     dir->entry.type = FS_TYPE_UNKNOWN;
     dir->entry.name[0] = '\0';
 
-    if (FindNextFile(dir->p, &ffd))
+    if (FindNextFileW(dir->p, &ffd))
     {
-        for (i = 0; ffd.cFileName[i]; i++)
-            dir->entry.name[i] = ffd.cFileName[i];
-
-        dir->entry.name[i] = '\0';
-
-        if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        if (wstringToUtf8(ffd.cFileName, dir->entry.name, sizeof(dir->entry.name) - 1))
         {
-            dir->entry.type = FS_TYPE_DIRECTORY;
-        }
-        else
-        {
-            dir->entry.type = FS_TYPE_FILE;
-        }
+            if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            {
+                dir->entry.type = FS_TYPE_DIRECTORY;
+            }
+            else
+            {
+                dir->entry.type = FS_TYPE_FILE;
+            }
 
-        return 1;
+            return 1;
+        }
     }
 
     return 0;
