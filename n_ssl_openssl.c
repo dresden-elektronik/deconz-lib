@@ -214,9 +214,14 @@ static int n_SslCreateSelfSignedCert(const char *key_file, const char *cert_file
 int N_SslInitOpenSsl(void)
 {
     void *lib;
+    void *libCrypto;
 
     lib = U_library_open_ex("libssl");
     if (!lib)
+        goto err;
+
+    libCrypto = U_library_open_ex("libcrypto");
+    if (!libCrypto)
         goto err;
 
     libSSL_CTX_new = U_library_symbol(lib, "SSL_CTX_new");
@@ -236,37 +241,37 @@ int N_SslInitOpenSsl(void)
     libSSL_get_error = U_library_symbol(lib, "SSL_get_error");
     libTLS_server_method = U_library_symbol(lib, "TLS_server_method");
     libTLS_client_method = U_library_symbol(lib, "TLS_client_method");
-    libBIO_new = U_library_symbol(lib, "BIO_new");
-    libBIO_s_mem = U_library_symbol(lib, "BIO_s_mem");
-    libBIO_write = U_library_symbol(lib, "BIO_write");
-    libBIO_read = U_library_symbol(lib, "BIO_read");
+    libBIO_new = U_library_symbol(libCrypto, "BIO_new");
+    libBIO_s_mem = U_library_symbol(libCrypto, "BIO_s_mem");
+    libBIO_write = U_library_symbol(libCrypto, "BIO_write");
+    libBIO_read = U_library_symbol(libCrypto, "BIO_read");
 
-    libEVP_PKEY_CTX_new_id = U_library_symbol(lib, "EVP_PKEY_CTX_new_id");
-    libEVP_PKEY_keygen_init = U_library_symbol(lib, "EVP_PKEY_keygen_init");
-    libEVP_PKEY_CTX_free = U_library_symbol(lib, "EVP_PKEY_CTX_free");
+    libEVP_PKEY_CTX_new_id = U_library_symbol(libCrypto, "EVP_PKEY_CTX_new_id");
+    libEVP_PKEY_keygen_init = U_library_symbol(libCrypto, "EVP_PKEY_keygen_init");
+    libEVP_PKEY_CTX_free = U_library_symbol(libCrypto, "EVP_PKEY_CTX_free");
 
-    libEVP_PKEY_CTX_set_rsa_keygen_bits = U_library_symbol(lib, "EVP_PKEY_CTX_set_rsa_keygen_bits");
-    libEVP_PKEY_keygen = U_library_symbol(lib, "EVP_PKEY_keygen");
-    libEVP_PKEY_free = U_library_symbol(lib, "EVP_PKEY_free");
+    libEVP_PKEY_CTX_set_rsa_keygen_bits = U_library_symbol(libCrypto, "EVP_PKEY_CTX_set_rsa_keygen_bits");
+    libEVP_PKEY_keygen = U_library_symbol(libCrypto, "EVP_PKEY_keygen");
+    libEVP_PKEY_free = U_library_symbol(libCrypto, "EVP_PKEY_free");
 
-    libEVP_sha256 = U_library_symbol(lib, "EVP_sha256");
-    libX509_new = U_library_symbol(lib, "X509_new");
-    libX509_free = U_library_symbol(lib, "X509_free");
-    libX509_set_version = U_library_symbol(lib, "X509_set_version");
-    libASN1_INTEGER_set = U_library_symbol(lib, "ASN1_INTEGER_set");
+    libEVP_sha256 = U_library_symbol(libCrypto, "EVP_sha256");
+    libX509_new = U_library_symbol(libCrypto, "X509_new");
+    libX509_free = U_library_symbol(libCrypto, "X509_free");
+    libX509_set_version = U_library_symbol(libCrypto, "X509_set_version");
+    libASN1_INTEGER_set = U_library_symbol(libCrypto, "ASN1_INTEGER_set");
 
-    libX509_get_serialNumber = U_library_symbol(lib, "X509_get_serialNumber");
-    libX509_gmtime_adj = U_library_symbol(lib, "X509_gmtime_adj");
-    libX509_getm_notBefore = U_library_symbol(lib, "X509_getm_notBefore");
-    libX509_getm_notAfter = U_library_symbol(lib, "X509_getm_notAfter");
-    libX509_set_pubkey = U_library_symbol(lib, "X509_set_pubkey");
+    libX509_get_serialNumber = U_library_symbol(libCrypto, "X509_get_serialNumber");
+    libX509_gmtime_adj = U_library_symbol(libCrypto, "X509_gmtime_adj");
+    libX509_getm_notBefore = U_library_symbol(libCrypto, "X509_getm_notBefore");
+    libX509_getm_notAfter = U_library_symbol(libCrypto, "X509_getm_notAfter");
+    libX509_set_pubkey = U_library_symbol(libCrypto, "X509_set_pubkey");
 
-    libX509_get_subject_name = U_library_symbol(lib, "X509_get_subject_name");
-    libX509_NAME_add_entry_by_txt = U_library_symbol(lib, "X509_NAME_add_entry_by_txt");
-    libX509_set_issuer_name = U_library_symbol(lib, "X509_set_issuer_name");
-    libX509_sign = U_library_symbol(lib, "X509_sign");
-    libPEM_write_PrivateKey = U_library_symbol(lib, "PEM_write_PrivateKey");
-    libPEM_write_X509 = U_library_symbol(lib, "PEM_write_X509");
+    libX509_get_subject_name = U_library_symbol(libCrypto, "X509_get_subject_name");
+    libX509_NAME_add_entry_by_txt = U_library_symbol(libCrypto, "X509_NAME_add_entry_by_txt");
+    libX509_set_issuer_name = U_library_symbol(libCrypto, "X509_set_issuer_name");
+    libX509_sign = U_library_symbol(libCrypto, "X509_sign");
+    libPEM_write_PrivateKey = U_library_symbol(libCrypto, "PEM_write_PrivateKey");
+    libPEM_write_X509 = U_library_symbol(libCrypto, "PEM_write_X509");
 
     if (!libSSL_CTX_new ||
         !libSSL_CTX_free ||
