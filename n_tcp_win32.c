@@ -14,6 +14,7 @@
 #include "deconz/n_tcp.h"
 #include "deconz/u_assert.h"
 #include "deconz/u_memory.h"
+#include "deconz/u_sstream.h"
 
 static int winSockInit = 0;
 
@@ -61,8 +62,50 @@ int N_TcpInit(N_TcpSocket *tcp, int af)
     return 1;
 }
 
-int N_TcpConnect(N_TcpSocket *tcp)
+int N_TcpConnect(N_TcpSocket *tcp, const char *host, unsigned short port)
 {
+    struct addrinfo hints, *res, *p;
+    U_SStream ss;
+    char portstr[16];
+
+    U_sstream_init(&ss, portstr, sizeof(portstr));
+    U_sstream_put_long(&ss, (long)port);
+
+    U_memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+
+    if      (tcp->addr.af == N_AF_IPV4) { hints.ai_family = AF_INET; }
+    else if (tcp->addr.af == N_AF_IPV6) { hints.ai_family = AF_INET6; }
+    else                                { return 0; }
+
+    if (tcp->fd == 0)
+        return 0;
+
+    hints.ai_socktype = SOCK_STREAM;
+    if (getaddrinfo(host, portstr, &hints, &res) != 0)
+        return 0;
+
+    for (p = res; p != NULL; p = p->ai_next)
+    {
+        size_t addrsz = 0;
+
+        if (p->ai_family == AF_INET)
+        {
+            addrsz = sizeof(struct sockaddr_in);
+        }
+        else if (p->ai_family == AF_INET6)
+        {
+            addrsz = sizeof(struct sockaddr_in6);
+        }
+
+        if (addrsz)
+        {
+            if (connect(tcp->fd, p->ai_addr, addrsz) == 0)
+                return 1;
+        }
+    }
+
+    N_TcpClose(tcp);
     return 0;
 }
 
