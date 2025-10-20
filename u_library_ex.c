@@ -59,7 +59,11 @@ void *U_library_open_ex(const char *filename)
     else if (U_sstream_starts_with(&ss, "libcrypto"))
     {
 #ifdef PL_MACOS
+#ifdef DECONZ_DEBUG_BUILD
+        filename = "/opt/homebrew/lib/libcrypto.3.dylib";
+#else
         filename = "../Frameworks/libcrypto.3.dylib";
+#endif
 #elif defined PL_WINDOWS
         lib = U_library_open("libcrypto-3.dll");
         if (!lib)
