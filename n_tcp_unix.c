@@ -56,7 +56,6 @@ int N_TcpInit(N_TcpSocket *tcp, int af)
 
 int N_TcpConnect(N_TcpSocket *tcp, const char *host, unsigned short port)
 {
-    int status;
     struct addrinfo hints, *res, *p;
     U_SStream ss;
     char portstr[16];
@@ -75,7 +74,7 @@ int N_TcpConnect(N_TcpSocket *tcp, const char *host, unsigned short port)
         return 0;
 
     hints.ai_socktype = SOCK_STREAM;
-    if ((status = getaddrinfo(host, portstr, &hints, &res)) != 0)
+    if (getaddrinfo(host, portstr, &hints, &res) != 0)
         return 0;
 
     for (p = res; p != NULL; p = p->ai_next)
