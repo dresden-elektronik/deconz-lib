@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2012-2025 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -25,6 +25,7 @@
 #include "deconz/zcl.h"
 #include "deconz/dbg_trace.h"
 #include "deconz/util.h"
+#include "deconz/u_sstream_ex.h"
 #include "deconz/mem_pool.h"
 #include "zcl_private.h"
 
@@ -1748,10 +1749,20 @@ QString ZclAttribute::toString(const ZclDataType &dataType, ZclAttribute::Format
     {
         if (d->m_value.isValid())
         {
-            const QByteArray arr = d->m_value.toByteArray();
+            QByteArray arr = d->m_value.toByteArray();
             if (arr.size() > 0)
             {
-                str = QLatin1String("0x") + arr.toHex();
+                U_SStream ss;
+                U_sstream_init(&ss, arr.data(), (unsigned)arr.size());
+
+                if (U_sstream_is_valid_utf8(&ss))
+                {
+                    str = arr;
+                }
+                else
+                {
+                    str = QLatin1String("0x") + arr.toHex();
+                }
             }
         }
     }
