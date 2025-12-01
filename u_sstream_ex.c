@@ -4,6 +4,65 @@ static const char _hex_table_lower[16] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
 
+/*! \brief Convert utf-8 to unicode code point.
+
+    Returns pointer to remainder of text. 'codepoint' is a valid codepoint
+    or set to 0xFFFD for invalid utf8.
+ */
+static const char * U_sstream_utf8_codepoint(const char *text, unsigned *codepoint)
+{
+    unsigned cp;
+
+    cp = (unsigned)*text & 0xFF;
+    text++;
+
+    if ((cp & 0x80) == 0)
+    {
+        // 1-byte ASCII
+    }
+    else if ((cp & 0xE0) == 0xC0 && text[0] != 0) /*  110 prefix 2-byte char */
+    {
+        /* 110x xxxx 10xx xxxx */
+        cp &= 0x1F;
+        cp <<= 6;
+        cp |= (unsigned)*text & 0x3F;
+        text++;
+    }
+    else if ((cp & 0xF0) == 0xE0 && text[0] != 0 && text[1] != 0) /*  1110 prefix 3-byte char */
+    {
+        /* 1110xxxx 10xxxxxx 10xxxxxx */
+        cp &= 0x0F;
+        cp <<= 6;
+        cp |= (unsigned)*text & 0x3F;
+        text++;
+        cp <<= 6;
+        cp |= (unsigned)*text & 0x3F;
+        text++;
+    }
+    else if ((cp & 0xF8) == 0xF0 && text[0] != 0 && text[1] != 0 && text[2] != 0) /*  11110 prefix 4-byte char */
+    {
+        /* 1110xxxx 10xxxxxx 10xxxxxx */
+        cp &= 0x07;
+        cp <<= 6;
+        cp |= (unsigned)*text & 0x3F;
+        text++;
+        cp <<= 6;
+        cp |= (unsigned)*text & 0x3F;
+        text++;
+        cp <<= 6;
+        cp |= (unsigned)*text & 0x3F;
+        text++;
+    }
+    else
+    {
+        cp = 0xFFFD;
+    }
+
+    *codepoint = cp;
+
+    return text;
+}
+
 void U_sstream_put_mac_address(U_SStream *ss, unsigned long long mac)
 {
     unsigned i;
@@ -107,4 +166,31 @@ unsigned char U_sstream_get_hex_byte(U_SStream *ss)
     }
 
     return result;
+}
+
+int U_sstream_is_valid_utf8(U_SStream *ss)
+{
+    const char *str;
+    unsigned codepoint;
+
+    if (ss->status != U_SSTREAM_OK)
+        return 0;
+
+    if (ss->len == 0)
+        return 0;
+
+    str = ss->str;
+    codepoint = 0;
+
+    for (;str < &ss->str[ss->len];)
+    {
+        str = U_sstream_utf8_codepoint(str, &codepoint);
+        if (codepoint == 0xFFFD)
+            return 0;
+
+        if (codepoint == 0)
+            break;
+    }
+
+    return 1;
 }

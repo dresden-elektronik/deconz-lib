@@ -26,6 +26,7 @@ U_LIBAPI void U_sstream_put_mac_address(U_SStream *ss, unsigned long long mac);
 U_LIBAPI unsigned long long U_sstream_get_mac_address(U_SStream *ss);
 /*! Parses a hex value (without 0x prefix) and returns as byte: for example FF -> 255 */
 U_LIBAPI unsigned char U_sstream_get_hex_byte(U_SStream *ss);
+U_LIBAPI int U_sstream_is_valid_utf8(U_SStream *ss);
 
 #ifdef __cplusplus
 }
