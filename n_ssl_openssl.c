@@ -514,6 +514,7 @@ err:
 
 int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len)
 {
+    int n;
     int n_ssl;
     int n_enc;
     unsigned outlen;
@@ -548,7 +549,8 @@ int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len)
         U_ASSERT(n_enc > 0);
         if (n_enc >= n_ssl) /* shouldn't be smaller */
         {
-            if (N_TcpWrite(&sock->tcp, bbuf, n_enc) != n_enc)
+            n = N_TcpWrite(&sock->tcp, bbuf, n_enc);
+            if (n != n_enc)
                 return 0;
 
             written += n_ssl;

@@ -21,6 +21,7 @@
 #include "deconz/u_assert.h"
 #include "deconz/u_memory.h"
 #include "deconz/u_sstream.h"
+#include "deconz/dbg_trace.h"
 
 
 int N_TcpInit(N_TcpSocket *tcp, int af)
@@ -293,6 +294,7 @@ int N_TcpRead(N_TcpSocket *tcp, void *buf, unsigned maxlen)
 
 int N_TcpWrite(N_TcpSocket *tcp, const void *buf, unsigned len)
 {
+    int err;
     ssize_t n;
     ssize_t pos;
     const char *data;
@@ -308,10 +310,28 @@ int N_TcpWrite(N_TcpSocket *tcp, const void *buf, unsigned len)
             n = write(tcp->fd, &data[pos], (ssize_t)(len - pos));
             if (n == -1)
             {
-                if (errno == EINTR)
+                err = errno;
+#ifdef DECONZ_DEBUG_BUILD
+                DBG_Printf(DBG_ERROR, "TCP write errno: %d\n", err);
+                DBG_Flush();
+#endif
+                if (err == EINTR)
                     continue;
-                if (errno == EBADF)
+
+                if (err == EPIPE || err == ECONNRESET)
+                {
+                    N_TcpClose(tcp);
+                }
+                else if (err == EBADF)
+                {
                     tcp->fd = 0;
+                }
+
+                if (tcp->fd)
+                {
+                    N_TcpClose(tcp);
+                    U_ASSERT(0 && "unhandled errno");
+                }
 
                 return 0;
             }
