@@ -39,6 +39,7 @@
 
 
 #define AM_MAX_URL_ELEMENTS 16
+#define VFS_MAX_URL_LENGTH  256
 
 typedef struct
 {
