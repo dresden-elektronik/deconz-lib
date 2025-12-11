@@ -114,6 +114,7 @@ set(PUB_INCLUDE_FILES
     deconz/node_interface.h
     deconz/http_client_handler.h
     deconz/qhttprequest_compat.h
+    deconz/declspec.h
 )
 
 add_library(${PROJECT_NAME} SHARED
