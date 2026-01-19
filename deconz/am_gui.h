@@ -16,7 +16,8 @@
 /*! GUI node actor to communicate with core node.
     Main purpose is to decouple GUI code from core.
  */
-#define AM_ACTOR_ID_GUI_NODE    3001
+#define AM_ACTOR_ID_GUI_NODE        3001
+#define AM_ACTOR_ID_GUI_MAINWINDOW  3002
 
 #define M_ID_GUI_NODE_SELECTED    AM_MESSAGE_ID_SPECIFIC_NOTIFY(0)
 #define M_ID_GUI_NODE_DESELECTED  AM_MESSAGE_ID_SPECIFIC_NOTIFY(1)
