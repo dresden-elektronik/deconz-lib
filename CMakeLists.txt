@@ -163,18 +163,6 @@ add_library(${PROJECT_NAME} SHARED
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE U_LIBAPI_PRIVATE)
 
-if (APPLE)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE PL_MACOS PL_UNIX)
-endif()
-
-if (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE PL_WINDOWS)
-endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE PL_LINUX PL_UNIX)
-endif()
-
 if (WIN32)
     target_sources(${PROJECT_NAME} PRIVATE n_tcp_win32.c)
     target_sources(${PROJECT_NAME} PRIVATE u_library_win32.c)
