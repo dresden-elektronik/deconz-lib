@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Manuel Pietschmann.
+ * Copyright (c) 2023-2026 Manuel Pietschmann.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -9,6 +9,7 @@
  */
 
 #include <dlfcn.h>
+#include "u_platform.h"
 #include "u_library.h"
 
 void *U_library_open(const char *filename)

@@ -19,6 +19,8 @@
   #include <QSerialPortInfo>
 #endif // USE_QEXT_SERIAL
 
+#include "deconz/u_platform.h"
+
 #ifdef PL_LINUX
 #include <sys/types.h>
 #include <sys/stat.h>

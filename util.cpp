@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2012-2026 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -17,6 +17,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <memory>
+#include "deconz/u_platform.h"
 #include "deconz/dbg_trace.h"
 #include "deconz/util.h"
 

@@ -1,3 +1,4 @@
+#include "deconz/u_platform.h"
 #include "deconz/u_assert.h"
 #include "deconz/u_random.h"
 

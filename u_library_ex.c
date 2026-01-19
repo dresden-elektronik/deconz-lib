@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2024-2026 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -8,6 +8,7 @@
  *
  */
 
+#include "deconz/u_platform.h"
 #include "deconz/u_sstream.h"
 #include "deconz/u_library_ex.h"
 

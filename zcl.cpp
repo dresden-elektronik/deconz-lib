@@ -18,7 +18,8 @@
 #include <QXmlStreamReader>
 #include <array>
 #include <tuple>
-#ifdef Q_OS_UNIX
+#include "deconz/u_platform.h"
+#ifdef PL_UNIX
 #include <unistd.h>
 #endif
 #include "deconz/aps.h"
@@ -2942,7 +2943,7 @@ ZclDataBase::ZclDataBase() :
     m_unknownCluster(0xFFFF, "unknown", "unkown cluster"),
     m_unknownDataType(0x00, "No Data", "-", 0, '-')
 {
-#ifdef Q_OS_WIN
+#ifdef PL_WINDOWS
     m_iconPath = QString("icons") + QDir::separator();
 #else
     QDir dir(QCoreApplication::applicationDirPath());
@@ -4091,7 +4092,7 @@ void ZclDataBase::initDbFile(const QString &zclFile)
         if (file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
             QTextStream stream(&file);
-#ifdef Q_OS_LINUX
+#ifdef PL_LINUX
 
             char path[128];
             ssize_t sz = readlink("/proc/self/exe", path, sizeof(path) - 1);
@@ -4128,7 +4129,7 @@ void ZclDataBase::initDbFile(const QString &zclFile)
                 }
             }
 #endif // Linux
-#ifdef Q_OS_WIN
+#ifdef PL_WINDOWS
             QDir dir(qApp->applicationDirPath());
             dir.cdUp();
             dir.cd("zcl");
@@ -4168,7 +4169,8 @@ void ZclDataBase::reloadAll(const QString &zclFile)
 
     clear();
 
-#ifdef Q_OS_UNIX
+#ifdef PL_UNIX
+    // TODO(mpi): this fails on Apple.
     QString generalXml("/usr/share/deCONZ/zcl/general.xml");
     if (QFile::exists(generalXml))
     {
@@ -4176,7 +4178,7 @@ void ZclDataBase::reloadAll(const QString &zclFile)
     }
 #else
     QString generalXml("");
-#endif // Q_OS_UNIX
+#endif // PL_UNIX
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
