@@ -106,6 +106,16 @@ typedef struct N_PrivOpenSslServer
  */
 static int n_SslCreateSelfSignedCert(const char *key_file, const char *cert_file, int bits, int days, const char *common_name)
 {
+// Philips Hue Pro Bridge uses the following
+//  Server certificate:
+//    subject: C=NL; O=Philips Hue; CN=C42996FFFEC5EA5B; OU=BSB003
+//    start date: Feb 27 17:38:28 2025 GMT
+//    expire date: Jan 19 03:14:07 2038 GMT
+//    issuer: C=NL; O=Philips Hue; CN=root-bridge
+//    Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA256
+//  SSL: certificate subject name 'C42996FFFEC5EA5B' does not match target hostname '192.168.178.32'
+
+
     // Phase 1: Key Generation
     // -----------------------
     EVP_PKEY *pkey = NULL;
