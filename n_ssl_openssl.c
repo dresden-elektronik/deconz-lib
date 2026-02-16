@@ -587,7 +587,7 @@ int N_SslReadOpenSsl(N_SslSocket *sock, void *buf, unsigned len)
     priv = (N_PrivOpenSsl*)&sock->_data[0];
 
     if (!priv->ssl)
-        return 0;
+        return 0; /* act as EOF */
 
     if ((priv->flags & N_FLAG_HANDSHAKE_DONE) == 0)
         return 1;
@@ -637,8 +637,9 @@ int N_SslCanReadOpenSsl(N_SslSocket *sock)
 
     priv = (N_PrivOpenSsl*)&sock->_data[0];
 
+    /* return 1 here so that N_SslReadOpenSsl return 0, e.g. EOF */
     if (!priv->ssl)
-        return 0;
+        return 1;
 
     priv->flags &= ~N_FLAG_HAS_SSL_READ_DATA;
     priv->flags &= ~N_FLAG_HAS_TCP_READ_DATA;
