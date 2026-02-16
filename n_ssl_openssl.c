@@ -454,7 +454,7 @@ int N_SslHandshakeOpenSsl(N_SslSocket *sock)
     priv = (N_PrivOpenSsl*)&sock->_data[0];
 
     if (!priv->ssl)
-        return 0;
+        return -1;
 
     if (priv->flags & N_FLAG_HANDSHAKE_DONE)
         return 1;
@@ -509,7 +509,7 @@ err:
     U_memset(priv, 0, sizeof(*priv));
     N_TcpClose(&sock->tcp);
 
-    return 0;
+    return -1;
 }
 
 int N_SslWriteOpenSsl(N_SslSocket *sock, const void *buf, unsigned len)
