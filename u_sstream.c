@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Manuel Pietschmann.
+ * Copyright (c) 2023-2026 Manuel Pietschmann.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -127,7 +127,7 @@ double U_sstream_get_double(U_SStream *ss)
     return r;
 }
 
-char U_sstream_peek_char(U_SStream *ss)
+char U_sstream_peek_char(const U_SStream *ss)
 {
     if (ss->pos < ss->len)
         return ss->str[ss->pos];
@@ -154,13 +154,19 @@ void U_sstream_skip_whitespace(U_SStream *ss)
     }
 }
 
-int U_sstream_starts_with(U_SStream *ss, const char *str)
+int U_sstream_starts_with(const U_SStream *ss, const char *str)
 {
     unsigned i;
     unsigned len;
 
+    if (str == 0)
+        return 0;
+
     for (len = 0; str[len]; len++)
         ;
+
+    if (len == 0)
+        return 0;
 
     if ((ss->len - ss->pos) >= len)
     {
@@ -183,8 +189,14 @@ int U_sstream_find(U_SStream *ss, const char *str)
     unsigned pos;
     unsigned match;
 
+    if (str == 0)
+        return 0;
+
     for (len = 0; str[len]; len++)
         ;
+
+    if (len == 0)
+        return 0;
 
     pos = ss->pos;
 
@@ -211,27 +223,73 @@ int U_sstream_find(U_SStream *ss, const char *str)
     return 0;
 }
 
+int U_sstream_compare(const U_SStream *ss, const char *str)
+{
+    unsigned i;
+    unsigned char c1;
+    unsigned char c2;
+
+    if (ss->status != U_SSTREAM_OK)
+        return 0;
+
+    if (str == 0)
+        return 0;
+
+    for (i = 0; i < ss->pos; i++)
+    {
+        c1 = (unsigned char)ss->str[i];
+        c2 = (unsigned char)str[i];
+
+        if (c2 == 0)
+            return (int)c1;
+
+        if (c1 != c2)
+            return (int)c1 - (int)c2;
+    }
+
+    if (str[i] == 0)
+        return 0;
+
+    return -((unsigned char)str[i]);
+}
+
 void U_sstream_put_str(U_SStream *ss, const char *str)
 {
     unsigned len;
+    unsigned pos;
 
     if (ss->status != U_SSTREAM_OK)
+        return;
+
+    if (str == 0)
         return;
 
     for (len = 0; str[len]; len++)
         ;
 
-    if (ss->pos + len + 1 < ss->len)
-    {
-        for (; *str; str++, ss->pos++)
-            ss->str[ss->pos] = *str;
-
-        ss->str[ss->pos] = '\0';
-    }
-    else
+    /* Check for potential overflow and buffer bounds */
+    if (ss->pos >= ss->len)
     {
         ss->status = U_SSTREAM_ERR_NO_SPACE;
+        return;
     }
+
+    /* Check for integer overflow and buffer bounds properly */
+    if (len >= ss->len - ss->pos)
+    {
+        ss->status = U_SSTREAM_ERR_NO_SPACE;
+        return;
+    }
+
+    /* Safe to copy */
+    pos = ss->pos;
+    while (*str && pos < ss->len - 1)
+    {
+        ss->str[pos++] = *str++;
+    }
+    
+    ss->str[pos] = '\0';
+    ss->pos = pos;
 }
 
 /*  Outputs the signed 32/64-bit integer 'num' as ASCII string.
@@ -256,10 +314,7 @@ void U_sstream_put_long(U_SStream *ss, long num)
         return;
 
     /* sign + max digits + NUL := 21 bytes on 64-bit */
-
     n = num;
-    if (n < 0)
-        ss->str[ss->pos++] = '-';
 
     pos = 0;
     do
@@ -271,11 +326,14 @@ void U_sstream_put_long(U_SStream *ss, long num)
     }
     while (n);
 
-    if (ss->len - ss->pos < (unsigned)pos + 1) /* not enough space */
+    if (ss->len - ss->pos < (unsigned)pos + 1 + (num < 0 ? 1 : 0)) /* not enough space */
     {
         ss->status = U_SSTREAM_ERR_NO_SPACE;
         return;
     }
+
+    if (num < 0)
+        ss->str[ss->pos++] = '-';
 
     for (i = pos; i > 0; i--) /* reverse copy */
     {
@@ -305,8 +363,6 @@ void U_sstream_put_longlong(U_SStream *ss, long long num)
     /* sign + max digits + NUL := 21 bytes on 64-bit */
 
     n = num;
-    if (n < 0)
-        ss->str[ss->pos++] = '-';
 
     pos = 0;
     do
@@ -318,11 +374,14 @@ void U_sstream_put_longlong(U_SStream *ss, long long num)
     }
     while (n);
 
-    if (ss->len - ss->pos < (unsigned)pos + 1) /* not enough space */
+    if (ss->len - ss->pos < (unsigned)pos + 1 + (num < 0 ? 1 : 0)) /* not enough space */
     {
         ss->status = U_SSTREAM_ERR_NO_SPACE;
         return;
     }
+
+    if (num < 0)
+        ss->str[ss->pos++] = '-';
 
     for (i = pos; i > 0; i--) /* reverse copy */
     {
@@ -556,8 +615,13 @@ void U_sstream_put_hex(U_SStream *ss, const void *data, unsigned size)
     unsigned i;
     unsigned char nib;
     const unsigned char *buf;
+    unsigned available;
 
-    if ((ss->len - ss->pos) < (size * 2) + 1)
+    if (ss->status != U_SSTREAM_OK)
+        return;
+
+    available = ss->len - ss->pos;
+    if (available < 1 || size > (available - 1) / 2)
     {
         ss->status = U_SSTREAM_ERR_NO_SPACE;
         return;
@@ -606,18 +670,19 @@ void U_sstream_seek(U_SStream *ss, unsigned pos)
  */
 long U_strtol(const char *s, unsigned len, const char **endp, int *err)
 {
-    int i;
-    int e;
-    long ch;
-    unsigned long max;
-    unsigned long result;
-
-    e = 0;
-    ch = 0;
-    result = 0;
-
-    max = ~0UL;
-    max >>= 1;
+    int sign = 1;
+    int digit;
+    unsigned long result = 0;
+    unsigned i = 0;
+    
+    /* Determine max values based on system architecture */
+#if __SIZEOF_LONG__ == 8
+    const unsigned long max = 9223372036854775807UL;
+    const unsigned long max_neg = 9223372036854775808UL;  /* |LONG_MIN| */
+#else
+    const unsigned long max = 2147483647UL;
+    const unsigned long max_neg = 2147483648UL;  /* |LONG_MIN| on 32-bit */
+#endif
 
     if (len == 0)
     {
@@ -627,41 +692,84 @@ long U_strtol(const char *s, unsigned len, const char **endp, int *err)
     }
 
     /* skip whitespace */
-    while (len && (*s == ' ' || *s == '\t'))
+    while (i < len && (*s == ' ' || *s == '\t'))
     {
         s++;
-        len--;
+        i++;
     }
 
-    i = *s == '-' ? 1 : 0;
-
-    for (; (unsigned)i < len; i++)
+    if (i >= len)
     {
-        ch = (unsigned char)s[i];
-        if (ch < '0' || ch > '9')
-            break;
-
-        ch = ch - '0';
-        e |= (result * 10 + (unsigned)ch < result) ? 2 : 0; /* overflow */
-        result *= 10;
-        result += (unsigned)ch;
+        *err = 1;
+        *endp = s;
+        return 0;
     }
 
-    if      (i == 1 && *s == '-') e |= 1;
-    else if (i == 0)              e |= 1;
-
-    if (result > max)
-    {
-        if      (*s != '-')           e |= 2; /* overflow */
-        else if (result > max + 1)    e |= 4; /* underflow */
-    }
-
-    *endp = &s[i];
-    *err = e;
-
+    /* Check for sign */
     if (*s == '-')
-        return -(long)result;
+    {
+        sign = -1;
+        s++;
+        i++;
+    }
+    else if (*s == '+')
+    {
+        s++;
+        i++;
+    }
 
+    if (i >= len)
+    {
+        *err = 1;
+        *endp = s;
+        return 0;
+    }
+
+    /* Check that first character is a digit */
+    if (*s < '0' || *s > '9')
+    {
+        *err = 1;
+        *endp = s;
+        return 0;
+    }
+
+    /* Handle the core conversion with overflow checking */
+    for (; i < len && *s >= '0' && *s <= '9'; i++, s++)
+    {
+        digit = *s - '0';
+        
+        /* Check for overflow before multiplying */
+        if (sign == 1)
+        {
+            /* Positive number - check against max */
+            if (result > (max - digit) / 10)
+            {
+                *err = 2; /* overflow */
+                *endp = s;
+                return 0;
+            }
+        }
+        else
+        {
+            /* Negative number - check against max_neg (|LONG_MIN|) */
+            if (result > (max_neg - digit) / 10)
+            {
+                *err = 2; /* overflow */
+                *endp = s;
+                return 0;
+            }
+        }
+        
+        result = result * 10 + digit;
+    }
+
+    *endp = s;
+    *err = 0;
+    
+    /* Apply sign at the end */
+    if (sign == -1)
+        return -(long)result;
+    
     return (long)result;
 }
 
@@ -690,6 +798,7 @@ static double pow_helper(double base, int exponent)
  * The err variable is a bitmap:
  *
  *   0x01 invalid input
+ *   0x02 overflow
  *
  * \param str pointer to string, doesn't have to be '\0' terminated.
  * \param len length of s ala strlen(s).
@@ -744,6 +853,12 @@ double U_strtod(const char *str, unsigned len, const char **endp, int *err)
     {
         required = 1;
         num = num * 10 + (*str - '0');
+        if (uss_is_infinity(num))
+        {
+            *endp = str;
+            *err = 0x02;
+            return 0.0;
+        }
         str++;
         len--;
     }
@@ -757,6 +872,12 @@ double U_strtod(const char *str, unsigned len, const char **endp, int *err)
         {
             required = 1;
             num = num * 10 + (*str - '0');
+            if (uss_is_infinity(num))
+            {
+                *endp = str;
+                *err = 0x02;
+                return 0.0;
+            }
             decimal_places++;
             str++;
             len--;

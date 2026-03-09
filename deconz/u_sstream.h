@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Manuel Pietschmann.
+ * Copyright (c) 2023-2026 Manuel Pietschmann.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -63,10 +63,11 @@ U_LIBAPI unsigned U_sstream_remaining(const U_SStream *ss);
 U_LIBAPI int U_sstream_at_end(const U_SStream *ss);
 U_LIBAPI long U_sstream_get_long(U_SStream *ss);
 U_LIBAPI double U_sstream_get_double(U_SStream *ss);
-U_LIBAPI char U_sstream_peek_char(U_SStream *ss);
+U_LIBAPI char U_sstream_peek_char(const U_SStream *ss);
 U_LIBAPI void U_sstream_skip_whitespace(U_SStream *ss);
-U_LIBAPI int U_sstream_starts_with(U_SStream *ss, const char *str);
+U_LIBAPI int U_sstream_starts_with(const U_SStream *ss, const char *str);
 U_LIBAPI int U_sstream_find(U_SStream *ss, const char *str);
+U_LIBAPI int U_sstream_compare(const U_SStream *ss, const char *str);
 U_LIBAPI void U_sstream_seek(U_SStream *ss, unsigned pos);
 U_LIBAPI void U_sstream_put_str(U_SStream *ss, const char *str);
 
@@ -83,7 +84,7 @@ U_LIBAPI void U_sstream_put_str(U_SStream *ss, const char *str);
  *   -Inf  --> -1e99999
  *   +Inf  -->  1e99999
  *
- * \param ss the stringt stream context.
+ * \param ss the string stream context.
  * \param num a double value.
  * \param precision of fractional part (1..18).
  */
