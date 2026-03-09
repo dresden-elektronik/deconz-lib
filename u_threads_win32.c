@@ -22,7 +22,12 @@ int U_thread_create(U_Thread *th, void (*func)(void *), void *arg)
     ret = _beginthread(thread_func_wrapper, stack_size, th);
 
     if (ret == -1L)
+    {
+        th->thread = 0;
+        th->func = 0;
+        th->arg = 0;
         return 0;
+    }
 
     th->thread = (void*)ret;
 
@@ -45,7 +50,12 @@ int U_thread_join(U_Thread *th)
     ret = WaitForSingleObject((HANDLE)th->thread, INFINITE);
 
     if (ret == WAIT_OBJECT_0)
+    {
+        th->thread = 0;
+        th->func = 0;
+        th->arg = 0;
         return 1;
+    }
 
     return 0;
 }

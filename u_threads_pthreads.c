@@ -1,3 +1,7 @@
+#ifdef __linux__
+#define _GNU_SOURCE /* for pthread_set_name_np */
+#endif
+#include <string.h> /* memset */
 #include <time.h> /* nanosleep */
 #include <errno.h>
 #include "u_threads.h"
@@ -15,10 +19,15 @@ int U_thread_create(U_Thread *th, void (*func)(void *), void *arg)
     th->func = func;
     th->arg = arg;
 
-    ret = pthread_create(&th->thread, NULL, thread_func_wrapper, th);
+    ret = pthread_create(&th->thread, 0, thread_func_wrapper, th);
 
 	if (ret != 0)
-		return 0;
+	{
+	    memset(&th->thread, 0, sizeof(th->thread));
+	    th->func = 0;
+	    th->arg = 0;
+	    return 0;
+	}
 
     return 1;
 }
@@ -35,7 +44,7 @@ int U_thread_set_name(U_Thread *th, const char *name)
      * Mac OS X: must be set from within the thread (can't specify thread ID)
      *   int pthread_setname_np(const char*);
      */
-#ifdef __LINUX__
+#ifdef __linux__
     if (0 == pthread_setname_np(th->thread, name))
         return 1;
 #endif
@@ -55,6 +64,10 @@ int U_thread_join(U_Thread *th)
 
     if (ret != 0)
         return 0;
+
+    memset(&th->thread, 0, sizeof(th->thread));
+    th->func = 0;
+    th->arg = 0;
 
     return 1;
 }
@@ -138,7 +151,7 @@ int U_thread_semaphore_init(U_Semaphore *s, unsigned initial_value)
 int U_thread_semaphore_destroy(U_Semaphore *s)
 {
 #ifdef __APPLE__
-    /* no destroy function?! */
+    dispatch_release(s->sem);
     return 1;
 #else
     if (sem_destroy(&s->sem) == 0)
@@ -152,14 +165,19 @@ int U_thread_semaphore_wait(U_Semaphore *s)
 {
 #ifdef __APPLE__
     dispatch_semaphore_wait(s->sem, DISPATCH_TIME_FOREVER);
+    return 1;
 #else
     int r;
 
     do {
         r = sem_wait(&s->sem);
     } while (r == -1 && errno == EINTR);
-#endif
+
+    if (r == -1)
+        return 0;
+
     return 1;
+#endif
 }
 
 int U_thread_semaphore_post(U_Semaphore *s)
