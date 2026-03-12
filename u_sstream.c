@@ -32,6 +32,9 @@ void U_sstream_init(U_SStream *ss, void *str, unsigned size)
 
 const char *U_sstream_str(const U_SStream *ss)
 {
+    if (ss->status != U_SSTREAM_OK)
+        return ss->str; /* might be null */
+
     U_ASSERT(ss->pos < ss->len);
     return &ss->str[ss->pos];
 }
@@ -44,6 +47,9 @@ unsigned U_sstream_pos(const U_SStream *ss)
 
 unsigned U_sstream_remaining(const U_SStream *ss)
 {
+    if (ss->status != U_SSTREAM_OK)
+        return 0;
+
     U_ASSERT(ss->pos <= ss->len);
     if (ss->pos <= ss->len)
         return ss->len - ss->pos;
@@ -53,6 +59,9 @@ unsigned U_sstream_remaining(const U_SStream *ss)
 
 int U_sstream_at_end(const U_SStream *ss)
 {
+    if (ss->status != U_SSTREAM_OK)
+        return 1;
+
     U_ASSERT(ss->pos <= ss->len);
     if (ss->pos <= ss->len)
         return (ss->len - ss->pos) == 0;
@@ -67,6 +76,9 @@ long U_sstream_get_long(U_SStream *ss)
     char *nptr;
     unsigned out_len;
     const char *endptr;
+
+    if (ss->status != U_SSTREAM_OK)
+        return 0;
 
     r = 0;
 
@@ -104,6 +116,9 @@ double U_sstream_get_double(U_SStream *ss)
 
     r = 0.0;
 
+    if (ss->status != U_SSTREAM_OK)
+        return r;
+
     if (ss->pos < ss->len)
     {
         nptr = &ss->str[ss->pos];
@@ -129,6 +144,9 @@ double U_sstream_get_double(U_SStream *ss)
 
 char U_sstream_peek_char(const U_SStream *ss)
 {
+    if (ss->status != U_SSTREAM_OK)
+        return '\0';
+
     if (ss->pos < ss->len)
         return ss->str[ss->pos];
     return '\0';
@@ -137,6 +155,10 @@ char U_sstream_peek_char(const U_SStream *ss)
 void U_sstream_skip_whitespace(U_SStream *ss)
 {
     char ch;
+
+    if (ss->status != U_SSTREAM_OK)
+        return;
+
     while (ss->pos < ss->len)
     {
         ch = ss->str[ss->pos];
@@ -158,6 +180,12 @@ int U_sstream_starts_with(const U_SStream *ss, const char *str)
 {
     unsigned i;
     unsigned len;
+
+    if (ss->status != U_SSTREAM_OK)
+        return 0;
+
+    if (ss->len <= ss->pos)
+        return 0;
 
     if (str == 0)
         return 0;
@@ -188,6 +216,12 @@ int U_sstream_find(U_SStream *ss, const char *str)
     unsigned len;
     unsigned pos;
     unsigned match;
+
+    if (ss->status != U_SSTREAM_OK)
+        return 0;
+
+    if (ss->len <= ss->pos)
+        return 0;
 
     if (str == 0)
         return 0;
@@ -261,6 +295,9 @@ void U_sstream_put_str(U_SStream *ss, const char *str)
     if (ss->status != U_SSTREAM_OK)
         return;
 
+    if (ss->len == 0)
+        return;
+
     if (str == 0)
         return;
 
@@ -313,6 +350,9 @@ void U_sstream_put_long(U_SStream *ss, long num)
     if (ss->status != U_SSTREAM_OK)
         return;
 
+    if (ss->len <= ss->pos)
+        return;
+
     /* sign + max digits + NUL := 21 bytes on 64-bit */
     n = num;
 
@@ -358,6 +398,9 @@ void U_sstream_put_longlong(U_SStream *ss, long long num)
     char buf[24];
 
     if (ss->status != U_SSTREAM_OK)
+        return;
+
+    if (ss->len <= ss->pos)
         return;
 
     /* sign + max digits + NUL := 21 bytes on 64-bit */
@@ -407,8 +450,10 @@ void U_sstream_put_ulonglong(U_SStream *ss, unsigned long long num)
     if (ss->status != U_SSTREAM_OK)
         return;
 
-    /* max digits + NUL := 21 bytes on 64-bit */
+    if (ss->len <= ss->pos)
+        return;
 
+    /* max digits + NUL := 21 bytes on 64-bit */
 
     pos = 0;
     do
@@ -543,6 +588,9 @@ void U_sstream_put_double(U_SStream *ss, double num, int precision)
     long long b;
     char buf[32];
 
+    if (ss->status != U_SSTREAM_OK)
+        return;
+
     if (uss_is_nan(num))
     {
         U_sstream_put_str(ss, "null");
@@ -620,7 +668,7 @@ void U_sstream_put_hex(U_SStream *ss, const void *data, unsigned size)
     if (ss->status != U_SSTREAM_OK)
         return;
 
-    available = ss->len - ss->pos;
+    available = (ss->pos < ss->len) ? ss->len - ss->pos : 0;
     if (available < 1 || size > (available - 1) / 2)
     {
         ss->status = U_SSTREAM_ERR_NO_SPACE;
