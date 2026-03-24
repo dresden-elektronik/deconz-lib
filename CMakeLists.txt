@@ -100,6 +100,7 @@ set(PUB_INCLUDE_FILES
     deconz/u_memory.h
     deconz/u_sha1.h
     deconz/u_sha256.h
+    deconz/u_sha512.h
     deconz/u_sstream.h
     deconz/u_sstream_ex.h
     deconz/u_threads.h
@@ -142,6 +143,7 @@ add_library(${PROJECT_NAME} SHARED
     u_rand32.c
     u_sha1.c
     u_sha256.c
+    u_sha512.c
     u_sstream.c
     u_sstream_ex.c
     u_time.c
