@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2024-2026 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -29,6 +29,9 @@ static enum N_SSL_Backend n_ssl_backend = N_SSL_BACKEND_NONE;
 
 int N_SslInit(void)
 {
+    if (n_ssl_backend != N_SSL_BACKEND_NONE)
+        return 1;
+
 #ifdef HAS_OPENSSL
     if (N_SslInitOpenSsl())
     {
@@ -43,6 +46,14 @@ int N_SslServerInit(N_SslSocket *sock, N_Address *addr, unsigned short port, con
 {
     if (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
         return N_SslServerInitOpenSsl(sock, addr, port, certpath, keypath);
+
+    return 0;
+}
+
+int N_SslClientInit(N_SslSocket *sock, const char *host, unsigned short port)
+{
+    if (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
+        return N_SslClientInitOpenSsl(sock, host, port);
 
     return 0;
 }

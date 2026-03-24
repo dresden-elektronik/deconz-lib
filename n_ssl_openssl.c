@@ -37,6 +37,7 @@ static SSL *(*libSSL_new)(SSL_CTX *ctx);
 static void (*libSSL_free)(SSL *ssl);
 static void (*libSSL_set_bio)(SSL *s, BIO *rbio, BIO *wbio);
 static void (*libSSL_set_accept_state)(SSL *s);
+static void (*libSSL_set_connect_state)(SSL *s);
 static int (*libSSL_is_init_finished)(const SSL *s);
 static int (*libSSL_do_handshake)(SSL *s);
 static int (*libSSL_write)(SSL *ssl, const void *buf, int num);
@@ -242,6 +243,7 @@ int N_SslInitOpenSsl(void)
     libSSL_free = U_library_symbol(lib, "SSL_free");
     libSSL_set_bio = U_library_symbol(lib, "SSL_set_bio");
     libSSL_set_accept_state = U_library_symbol(lib, "SSL_set_accept_state");
+    libSSL_set_connect_state = U_library_symbol(lib, "SSL_set_connect_state");
     libSSL_is_init_finished = U_library_symbol(lib, "SSL_is_init_finished");
     libSSL_do_handshake = U_library_symbol(lib, "SSL_do_handshake");
     libSSL_peek = U_library_symbol(lib, "SSL_peek");
@@ -291,6 +293,7 @@ int N_SslInitOpenSsl(void)
         !libSSL_free ||
         !libSSL_set_bio ||
         !libSSL_set_accept_state ||
+        !libSSL_set_connect_state ||
         !libSSL_is_init_finished ||
         !libSSL_do_handshake ||
         !libSSL_peek ||
@@ -334,6 +337,49 @@ int N_SslInitOpenSsl(void)
     return 1;
 
 err:
+    return 0;
+}
+
+int N_SslClientInitOpenSsl(N_SslSocket *cli, const char *host, unsigned short port)
+{
+    N_PrivOpenSsl *clipriv;
+    const BIO_METHOD *biomethod;
+
+    clipriv = (N_PrivOpenSsl*)&cli->_data[0];
+
+    U_memset(clipriv, 0, sizeof(*clipriv));
+
+    if (0 == (N_TcpInit(&cli->tcp, N_AF_IPV4) && N_TcpConnect(&cli->tcp, host, port)))
+    {
+        goto err;
+    }
+
+    clipriv->ctx = libSSL_CTX_new(libTLS_client_method());
+    biomethod = libBIO_s_mem();
+    U_ASSERT(biomethod);
+
+    clipriv->rbio = libBIO_new(biomethod);
+    clipriv->wbio = libBIO_new(biomethod);
+    U_ASSERT(clipriv->rbio);
+    U_ASSERT(clipriv->wbio);
+
+    clipriv->ssl = libSSL_new(clipriv->ctx);
+    U_ASSERT(clipriv->ssl);
+    if (!clipriv->ssl)
+        goto err;
+
+    libSSL_set_connect_state(clipriv->ssl);
+    libSSL_set_bio(clipriv->ssl, clipriv->rbio, clipriv->wbio);
+
+    return 1;
+
+err:
+    if (clipriv->ssl)
+        libSSL_free(clipriv->ssl);
+
+    U_memset(clipriv, 0, sizeof(*clipriv));
+    N_TcpClose(&cli->tcp);
+
     return 0;
 }
 
@@ -441,7 +487,6 @@ int N_SslAcceptOpenSsl(N_SslSocket *srv, N_SslSocket *cli)
     libSSL_set_accept_state(clipriv->ssl);
     libSSL_set_bio(clipriv->ssl, clipriv->rbio, clipriv->wbio);
     return 1;
-
 
 err:
     if (clipriv->ssl)
