@@ -54,10 +54,11 @@ enum U8Parameter
  */
 enum U16Parameter
 {
-    ParamPANID,    //!< the short PANID
+    ParamPANID,      //!< the short PANID
     ParamNwkAddress, //!< the network address of the device
-    ParamHttpPort,    //!< the HTTP server port
-    ParamHttpsPort    //!< the HTTPS server port
+    ParamHttpPort,   //!< the HTTP server port
+    ParamHttpsPort,  //!< the HTTPS server port
+    ParamHttpProxyPort  //!< the HTTP proxy port, 0 for none
 };
 
 /*! Parameters of type uint32_t.
@@ -85,7 +86,8 @@ enum StringParameter
 {
     ParamDeviceName, //!< name of the connetced device (RaspBee, ConBee, ...)
     ParamDevicePath, //!< /dev/ttyUSB0, /dev/ttyAMA0, COM49, ...
-    ParamHttpRoot    //!< the http server root directory
+    ParamHttpRoot,   //!< the http server root directory
+    ParamHttpProxy   //!< the http proxy: "none" or a hostname/ip-address
 };
 
 /*! Parameters of type QByteArray.

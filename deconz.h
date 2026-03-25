@@ -2,7 +2,7 @@
 #define DECONZ_H
 
 /*
- * Copyright (c) 2012-2025 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2012-2026 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -14,7 +14,7 @@
 /*! deCONZ library version as numeric value of the form:
     0xMMNNPP (MM = major, NN = minor, PP = patch).
  */
-#define DECONZ_LIB_VERSION 0x011204
+#define DECONZ_LIB_VERSION 0x011300
 
 #include <deconz/declspec.h>
 #include <deconz/types.h>
