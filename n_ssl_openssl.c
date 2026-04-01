@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 dresden elektronik ingenieurtechnik gmbh.
+ * Copyright (c) 2024-2026 dresden elektronik ingenieurtechnik gmbh.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -22,10 +22,13 @@
 #include "deconz/u_assert.h"
 #include "deconz/u_library_ex.h"
 #include "deconz/u_memory.h"
+#include "deconz/u_sstream.h"
+#include "deconz/n_proxy.h"
 #include "deconz/file.h"
+#include "deconz/u_threads.h"
 #include "n_ssl_openssl.h"
 
-#define N_FLAG_HANDSHAKE_DONE 1
+#define N_FLAG_HANDSHAKE_DONE    1
 #define N_FLAG_HAS_SSL_READ_DATA 4
 #define N_FLAG_HAS_TCP_READ_DATA 8
 
@@ -45,6 +48,7 @@ static int (*libSSL_read)(SSL *ssl, void *buf, int num);
 static int (*libSSL_peek)(SSL *ssl, void *buf, int num);
 static int (*libSSL_shutdown)(SSL *ssl);
 static int (*libSSL_get_error)(const SSL *s, int ret_code);
+static void (*libERR_error_string_n)(unsigned long e, char *buf, size_t len);
 static const SSL_METHOD *(*libTLS_server_method)(void);
 static const SSL_METHOD *(*libTLS_client_method)(void);
 static BIO *(*libBIO_new)(const BIO_METHOD *type);
@@ -251,6 +255,7 @@ int N_SslInitOpenSsl(void)
     libSSL_read = U_library_symbol(lib, "SSL_read");
     libSSL_write = U_library_symbol(lib, "SSL_write");
     libSSL_get_error = U_library_symbol(lib, "SSL_get_error");
+    libERR_error_string_n = U_library_symbol(lib, "ERR_error_string_n");
     libTLS_server_method = U_library_symbol(lib, "TLS_server_method");
     libTLS_client_method = U_library_symbol(lib, "TLS_client_method");
     libBIO_new = U_library_symbol(libCrypto, "BIO_new");
@@ -340,18 +345,34 @@ err:
     return 0;
 }
 
-int N_SslClientInitOpenSsl(N_SslSocket *cli, const char *host, unsigned short port)
+int N_SslClientInitOpenSsl(N_SslSocket *cli, const char *host, unsigned short port, void *proxy_)
 {
+    int i;
+    int nread;
+    int len;
+    U_SStream ss;
+    char buf[1024];
     N_PrivOpenSsl *clipriv;
+    N_Proxy *proxy = proxy_;
     const BIO_METHOD *biomethod;
 
     clipriv = (N_PrivOpenSsl*)&cli->_data[0];
 
     U_memset(clipriv, 0, sizeof(*clipriv));
 
-    if (0 == (N_TcpInit(&cli->tcp, N_AF_IPV4) && N_TcpConnect(&cli->tcp, host, port)))
+    if (proxy && proxy->type == N_ProxyTypeHttp)
     {
-        goto err;
+        if (0 == (N_TcpInit(&cli->tcp, N_AF_IPV4) && N_TcpConnect(&cli->tcp, proxy->host, proxy->port)))
+        {
+            goto err;
+        }
+    }
+    else
+    {
+        if (0 == (N_TcpInit(&cli->tcp, N_AF_IPV4) && N_TcpConnect(&cli->tcp, host, port)))
+        {
+            goto err;
+        }
     }
 
     clipriv->ctx = libSSL_CTX_new(libTLS_client_method());
@@ -371,6 +392,51 @@ int N_SslClientInitOpenSsl(N_SslSocket *cli, const char *host, unsigned short po
     libSSL_set_connect_state(clipriv->ssl);
     libSSL_set_bio(clipriv->ssl, clipriv->rbio, clipriv->wbio);
 
+    if (proxy && proxy->type == N_ProxyTypeHttp)
+    {
+        U_sstream_init(&ss, buf, sizeof(buf));
+        U_sstream_put_str(&ss, "CONNECT ");
+        U_sstream_put_str(&ss, host);
+        U_sstream_put_str(&ss, ":");
+        U_sstream_put_long(&ss, port);
+        U_sstream_put_str(&ss, " HTTP/1.1\r\n");
+        U_sstream_put_str(&ss, "Host: ");
+        U_sstream_put_str(&ss, host);
+        U_sstream_put_str(&ss, ":");
+        U_sstream_put_long(&ss, port);
+        U_sstream_put_str(&ss, "\r\n");
+        U_sstream_put_str(&ss, "Proxy-Connection: Keep-Alive\r\n");
+        U_sstream_put_str(&ss, "\r\n");
+
+        if (N_TcpWrite(&cli->tcp, buf, ss.pos) != ss.pos)
+            goto err;
+
+        len = 0;
+        for (i = 0; i < 10; i++)
+        {
+            while (N_TcpCanRead(&cli->tcp) && len < (int)sizeof(buf))
+            {
+                nread = N_TcpRead(&cli->tcp, &buf[len], (int)sizeof(buf) - len);
+                if (nread <= 0)
+                    goto err;
+
+                len += nread;
+                U_sstream_init(&ss, buf, len);
+                if (U_sstream_find(&ss, "\r\n\r\n"))
+                {
+                    ss.pos = 0;
+                    if (U_sstream_find(&ss, "HTTP/1.1 200"))
+                        goto connect_ok; /* oh no a goto  */
+                }
+            }
+            U_thread_msleep(50);
+        }
+
+        if (i == 10) /* failed to connect */
+            goto err;
+    }
+
+connect_ok:
     return 1;
 
 err:
@@ -626,7 +692,6 @@ int N_SslReadOpenSsl(N_SslSocket *sock, void *buf, unsigned len)
     int i;
     int n;
     int ret;
-
     N_PrivOpenSsl *priv;
 
     priv = (N_PrivOpenSsl*)&sock->_data[0];
@@ -652,7 +717,12 @@ int N_SslReadOpenSsl(N_SslSocket *sock, void *buf, unsigned len)
             goto err;
         }
 
-        priv->flags |= N_FLAG_HAS_SSL_READ_DATA;
+        /* 1) already decrypted data in SSL object */
+        char tmp[1];
+        if (libSSL_peek(priv->ssl, tmp, sizeof(tmp)) > 0)
+        {
+            priv->flags |= N_FLAG_HAS_SSL_READ_DATA;
+        }
     }
 
     if (priv->flags & N_FLAG_HAS_SSL_READ_DATA)
@@ -661,7 +731,12 @@ int N_SslReadOpenSsl(N_SslSocket *sock, void *buf, unsigned len)
         n = libSSL_read(priv->ssl, buf, len);
         if (n > 0)
             return n;
+
+        U_ASSERT(n != 0);
     }
+
+    if (n > 0)
+        return -2;
 
     return 0;
 
@@ -669,7 +744,6 @@ err:
     if (priv->ssl)
         libSSL_free(priv->ssl);
 
-    priv->flags |= 2;
     U_memset(priv, 0, sizeof(*priv));
     N_TcpClose(&sock->tcp);
 

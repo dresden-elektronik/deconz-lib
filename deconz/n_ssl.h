@@ -26,9 +26,10 @@ extern "C" {
 
 DECONZ_DLLSPEC int N_SslInit(void);
 DECONZ_DLLSPEC int N_SslServerInit(N_SslSocket *, N_Address*, unsigned short port, const char *certpath, const char *keypath);
-DECONZ_DLLSPEC int N_SslClientInit(N_SslSocket *, const char *host, unsigned short port);
+DECONZ_DLLSPEC int N_SslClientInit(N_SslSocket *, const char *host, unsigned short port, void *proxy /* N_Proxy: can be NULL*/);
 DECONZ_DLLSPEC int N_SslAccept(N_SslSocket *srv, N_SslSocket *cli);
 DECONZ_DLLSPEC int N_SslHandshake(N_SslSocket *sock);
+/* N_SslRead returns -2 if there was data from TCP but needs to read more data to be decrypted. */
 DECONZ_DLLSPEC int N_SslRead(N_SslSocket *sock, void *buf, unsigned maxlen);
 DECONZ_DLLSPEC int N_SslWrite(N_SslSocket *sock, const void *buf, unsigned len);
 DECONZ_DLLSPEC int N_SslRead(N_SslSocket *sock, void *buf, unsigned len);

@@ -50,10 +50,10 @@ int N_SslServerInit(N_SslSocket *sock, N_Address *addr, unsigned short port, con
     return 0;
 }
 
-int N_SslClientInit(N_SslSocket *sock, const char *host, unsigned short port)
+int N_SslClientInit(N_SslSocket *sock, const char *host, unsigned short port, void *proxy)
 {
     if (n_ssl_backend == N_SSL_BACKEND_OPENSSL)
-        return N_SslClientInitOpenSsl(sock, host, port);
+        return N_SslClientInitOpenSsl(sock, host, port, proxy);
 
     return 0;
 }
