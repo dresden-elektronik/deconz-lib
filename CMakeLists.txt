@@ -81,6 +81,7 @@ set(PUB_INCLUDE_FILES
     deconz/green_power_controller.h
     deconz/nanbox.h
     deconz/n_address.h
+    deconz/n_downloader.h
     deconz/n_proxy.h
     deconz/n_ssl.h
     deconz/n_tcp.h
@@ -133,6 +134,7 @@ add_library(${PROJECT_NAME} SHARED
     green_power.cpp
     green_power_controller.cpp
     nanbox.c
+    n_downloader.c
     n_ssl.c
     n_proxy.cpp
     util.cpp
