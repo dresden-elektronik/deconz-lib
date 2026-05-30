@@ -694,6 +694,7 @@ int N_SslReadOpenSsl(N_SslSocket *sock, void *buf, unsigned len)
     int ret;
     N_PrivOpenSsl *priv;
 
+    n = 0;
     priv = (N_PrivOpenSsl*)&sock->_data[0];
 
     if (!priv->ssl)
