@@ -3286,17 +3286,17 @@ void ZclDataBase::load(const QString &dbfile)
                             }
                         }
 
-                        if (xmlAttributes.hasAttribute(QLatin1String("vendor")))
+                        if (xmlAttributes.hasAttribute(QLatin1String("mfcode")))
                         {
 
-                            uint16_t vendor = xmlAttributes.value(QLatin1String("vendor")).toUShort(&ok, 16);
+                            uint16_t mfcode = xmlAttributes.value(QLatin1String("mfcode")).toUShort(&ok, 16);
                             if (ok)
                             {
-                                command.setManufacturerId(vendor);
+                                command.setManufacturerId(mfcode);
                             }
                             else
                             {
-                                DBG_Printf(DBG_ZCLDB, "ZCL line: %d, invalid command vendor id\n", (int)xml.lineNumber());
+                                DBG_Printf(DBG_ZCLDB, "ZCL line: %d, invalid command mfcode id\n", (int)xml.lineNumber());
                             }
                         }
 
