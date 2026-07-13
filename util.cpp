@@ -24,7 +24,6 @@
 #ifdef PL_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <limits.h>
 #include <intrin.h>
 typedef unsigned __int32  uint32_t;
 
