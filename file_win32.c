@@ -135,7 +135,7 @@ int FS_OpenFile(FS_File *fp, int flags, const char *path)
 int FS_FileExists(const char *path)
 {
     WCHAR wpath[MAX_PATH + 1];
-    WIN32_FIND_DATA findFileData;
+    WIN32_FIND_DATAW findFileData;
 
     if (utf8ToWString(path, wpath, MAX_PATH))
     {
@@ -286,7 +286,7 @@ int FS_OpenDir(FS_Dir *dir, const char *path)
         return 0;
 
     StringCchCopyW(szDir, MAX_PACKAGE_NAME, wpath);
-    StringCchCatW(szDir, MAX_PATH, TEXT("\\*"));
+    StringCchCatW(szDir, MAX_PATH, L"\\*");
 
     dir->p = FindFirstFileW(szDir, &ffd);
 
