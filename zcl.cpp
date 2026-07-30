@@ -929,18 +929,29 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
     case Zcl48BitInt:
     case Zcl56BitInt:
     {
-        d->m_numericValue.s64 = 0;
-
         if (type.length() > 8)
         {
             return false;
         }
 
-        // TODO the signed bit 0x80 needs to be extracted and processes.
+        // Build value from LE bytes — explicit shifts, no endian assumption.
+        uint64_t val = 0;
         char bytes[8];
         stream.readRawData(bytes, type.length());
-        memcpy(&d->m_numericValue.s64, bytes, type.length());
-        d->m_value = qint64(d->m_numericValue.s64);
+        for (size_t i = 0; i < type.length(); ++i)
+        {
+            val |= ((uint64_t)(uint8_t)bytes[i]) << (i * 8);
+        }
+
+        // Sign-extend: if MSB of the value is set, fill all upper bits with 1s.
+        uint64_t bits = type.length() * 8;
+        if (val & (UINT64_C(1) << (bits - 1)))
+        {
+            val |= ~((UINT64_C(1) << bits) - 1);
+        }
+
+        d->m_numericValue.s64 = (qint64)val;
+        d->m_value = d->m_numericValue.s64;
     }
         break;
 
