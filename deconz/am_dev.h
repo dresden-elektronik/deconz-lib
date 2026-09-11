@@ -10,8 +10,6 @@
 //   bits 16-23: reason (disconnect reason, 0 if not disconnecting)
 //   bits 24-31: reserved for future extensions
 #define M_ID_DEV_STATE              AM_MESSAGE_ID_SPECIFIC_NOTIFY(10)
-#define M_ID_DEV_ACTIVITY           AM_MESSAGE_ID_SPECIFIC_NOTIFY(13)
-#define M_ID_DEV_TIMEOUT            AM_MESSAGE_ID_SPECIFIC_NOTIFY(14)
 
 // Requests: GUI_MAINWINDOW → CORE_DEV
 #define M_ID_DEV_CONNECT_REQ        AM_MESSAGE_ID_SPECIFIC_REQUEST(20)
