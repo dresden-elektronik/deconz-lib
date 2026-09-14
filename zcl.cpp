@@ -860,10 +860,28 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
     case Zcl8BitData:
     case Zcl8BitUint:
     case Zcl8BitEnum:
-    {
-        stream >> d->m_numericValue.u8;
-        d->m_value = quint64(d->m_numericValue.u8);
-    }
+        if (isList() && (listSize() > 0))
+        {
+            quint8 val;
+
+            QVariantList ls;
+            int i = listSize();
+
+            while (i > 0 && !stream.atEnd())
+            {
+                stream >> val;
+                ls.append(val);
+                i--;
+            }
+
+            d->m_numericValue.u8 = ls.isEmpty() ? 0 : (quint8)ls.first().toUInt();
+            d->m_value = ls;
+        }
+        else
+        {
+            stream >> d->m_numericValue.u8;
+            d->m_value = quint64(d->m_numericValue.u8);
+        }
         break;
 
     case Zcl16BitData:
@@ -1790,7 +1808,39 @@ QString ZclAttribute::toString(const ZclDataType &dataType, ZclAttribute::Format
 
     case Zcl8BitData:
     case Zcl8BitUint:
-        str = QString("%1").arg((quint16)d->m_numericValue.u8, fieldWidth, (int)numericBase(), QChar('0'));
+        if (isList() && d->m_value.userType() == QVariant::List)
+        {
+            const QVariantList values = d->m_value.toList();
+
+            for (int i = 0; i < values.size(); i++)
+            {
+                QString value = QString("%1").arg(values[i].toUInt(), fieldWidth, (int)numericBase(), QChar('0'));
+
+                if (formatHint == Prefix)
+                {
+                    if (numericBase() == 16)
+                    {
+                        value.prepend("0x");
+                    }
+                    else if (numericBase() == 2)
+                    {
+                        value.prepend("0b");
+                    }
+                    formatHintHandled = true;
+                }
+
+                if (!str.isEmpty())
+                {
+                    str += ", ";
+                }
+
+                str += value;
+            }
+        }
+        else
+        {
+            str = QString("%1").arg((quint16)d->m_numericValue.u8, fieldWidth, (int)numericBase(), QChar('0'));
+        }
         break;
     case ZclAttributeId:
     case ZclClusterId:
