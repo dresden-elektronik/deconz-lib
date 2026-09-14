@@ -876,16 +876,16 @@ bool ZclAttribute::readFromStream(QDataStream &stream)
             quint16 val;
 
             QVariantList ls;
-            int i = listSize() - 1;
+            int i = listSize();
 
-            while (i && !stream.atEnd())
+            while (i > 0 && !stream.atEnd())
             {
                 stream >> val;
                 ls.append(val);
                 i--;
             }
 
-            d->m_numericValue.u16 = (quint16)ls.first().toUInt();
+            d->m_numericValue.u16 = ls.isEmpty() ? 0 : (quint16)ls.first().toUInt();
             d->m_value = ls;
         }
         else
@@ -1733,6 +1733,7 @@ QString ZclAttribute::toString(const ZclDataType &dataType, ZclAttribute::Format
 {
     QString str;
     Q_D(const ZclAttribute);
+    bool formatHintHandled = false;
 
     int fieldWidth = 0; // auto
     if (numericBase() == 16)
@@ -1796,7 +1797,39 @@ QString ZclAttribute::toString(const ZclDataType &dataType, ZclAttribute::Format
     case ZclClusterId:
     case Zcl16BitUint:
     case Zcl16BitData:
-        str = QString("%1").arg(d->m_numericValue.u16, fieldWidth, (int)numericBase(), QChar('0'));
+        if (isList() && d->m_value.userType() == QVariant::List)
+        {
+            const QVariantList values = d->m_value.toList();
+
+            for (int i = 0; i < values.size(); i++)
+            {
+                QString value = QString("%1").arg(values[i].toUInt(), fieldWidth, (int)numericBase(), QChar('0'));
+
+                if (formatHint == Prefix)
+                {
+                    if (numericBase() == 16)
+                    {
+                        value.prepend("0x");
+                    }
+                    else if (numericBase() == 2)
+                    {
+                        value.prepend("0b");
+                    }
+                    formatHintHandled = true;
+                }
+
+                if (!str.isEmpty())
+                {
+                    str += ", ";
+                }
+
+                str += value;
+            }
+        }
+        else
+        {
+            str = QString("%1").arg(d->m_numericValue.u16, fieldWidth, (int)numericBase(), QChar('0'));
+        }
         break;
     case Zcl24BitUint:
     case Zcl32BitUint:
@@ -1901,21 +1934,24 @@ QString ZclAttribute::toString(const ZclDataType &dataType, ZclAttribute::Format
         break;
     }
 
-    switch (formatHint)
+    if (!formatHintHandled)
     {
-    case Prefix:
-        if (numericBase() == 16)
+        switch (formatHint)
         {
-            str.prepend("0x");
-        }
-        else if (numericBase() == 2)
-        {
-            str.prepend("0b");
-        }
-        break;
+        case Prefix:
+            if (numericBase() == 16)
+            {
+                str.prepend("0x");
+            }
+            else if (numericBase() == 2)
+            {
+                str.prepend("0b");
+            }
+            break;
 
-    default:
-        break;
+        default:
+            break;
+        }
     }
 
     return str;
@@ -2276,6 +2312,60 @@ bool ZclCommand::readFromStream(QDataStream &stream)
     bool ok = true;
     Q_D(ZclCommand);
 
+    auto listSizeFromAttribute = [](const ZclAttribute &attr) -> int
+    {
+        switch (attr.dataType())
+        {
+        case ZclBoolean:
+        case Zcl8BitData:
+        case Zcl8BitUint:
+        case Zcl8BitEnum:
+            return attr.numericValue().u8;
+
+        case ZclAttributeId:
+        case ZclClusterId:
+        case Zcl16BitData:
+        case Zcl16BitUint:
+        case Zcl16BitEnum:
+            return attr.numericValue().u16;
+
+        case Zcl24BitData:
+        case Zcl24BitUint:
+        case Zcl32BitData:
+        case Zcl32BitUint:
+            return int(attr.numericValue().u32);
+
+        case Zcl40BitData:
+        case Zcl40BitUint:
+        case Zcl48BitData:
+        case Zcl48BitUint:
+        case Zcl56BitData:
+        case Zcl56BitUint:
+        case Zcl64BitData:
+        case Zcl64BitUint:
+        case ZclIeeeAddress:
+            return int(attr.numericValue().u64);
+
+        case Zcl8BitInt:
+            return attr.numericValue().s8;
+        case Zcl16BitInt:
+            return attr.numericValue().s16;
+        case Zcl24BitInt:
+        case Zcl32BitInt:
+            return int(attr.numericValue().s32);
+        case Zcl40BitInt:
+        case Zcl48BitInt:
+        case Zcl56BitInt:
+        case Zcl64BitInt:
+            return int(attr.numericValue().s64);
+
+        default:
+            break;
+        }
+
+        return -1;
+    };
+
     std::vector<ZclAttribute>::iterator i = d->m_payload.begin();
     std::vector<ZclAttribute>::iterator end = d->m_payload.end();
 
@@ -2284,6 +2374,22 @@ bool ZclCommand::readFromStream(QDataStream &stream)
         if (ok && !i->readFromStream(stream))
         {
             ok = false;
+        }
+
+        const int listSize = listSizeFromAttribute(*i);
+
+        if (listSize >= 0)
+        {
+            std::vector<ZclAttribute>::iterator j = i;
+            ++j;
+
+            for (; j != end; ++j)
+            {
+                if (j->isList() && j->listSizeAttribute() == i->id())
+                {
+                    j->setListSize(listSize);
+                }
+            }
         }
 
         // clear all following values
